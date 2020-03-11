@@ -1,0 +1,21 @@
+{
+    "model": {
+        "name": "MobileNetV2"
+    },
+    "optimizer": {
+        "name": "sgd",
+	"momentum": 0.9,
+	"weight_decay": 1e-5
+    },
+    "lr_scheduler": {
+        "name": "cosine_annealing",
+	"base_lr": 0.01
+    },
+    "augmentation": {
+        "train": "resize",
+        "val": "resize"
+    },
+    "batch_size": 64,
+    "input_size": 224,
+    "max_epochs": 100
+}
