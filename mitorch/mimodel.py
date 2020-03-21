@@ -1,6 +1,8 @@
+import pytorch_lightning as pl
+import torch
 from .builders import DataLoaderBuilder, LrSchedulerBuilder, ModelBuilder, OptimizerBuilder
 from .evaluators import MulticlassClassificationEvaluator, MultilabelClassificationEvaluator, ObjectDetectionEvaluator
-import pytorch_lightning as pl
+
 
 # TODO: Support multigpu
 class MiModel(pl.LightningModule):
@@ -50,8 +52,7 @@ class MiModel(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         results = self.evaluator.get_reports()
-        for key in results:
-            results[key] = torch.tensor(results[key])
+        results = {key: torch.tensor(value) for key, value in results.items()}
         results['val_loss'] = torch.tensor([o['val_loss'] for o in outputs]).mean()
         return {'log': results}
 

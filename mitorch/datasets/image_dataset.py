@@ -99,7 +99,7 @@ class FileReader:
     def open(self, filepath, mode='r'):
         if '@' in filepath:
             zip_filepath, filepath = filepath.split('@')
-            if not zip_filepath in self.zipfile_cache:
+            if zip_filepath not in self.zipfile_cache:
                 self.zipfile_cache[zip_filepath] = ThreadSafeZipFile(self.base_dir / zip_filepath)
             return self.zipfile_cache[zip_filepath].open(filepath)
         else:
