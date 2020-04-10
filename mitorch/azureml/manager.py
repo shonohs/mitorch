@@ -35,7 +35,6 @@ class AzureMLManager:
         run_config.target = self.cluster
         dependencies = azureml.core.conda_dependencies.CondaDependencies()
         dependencies.set_python_version('3.7')
-        dependencies.add_pip_package('https://github.com/shonohs/mitorch/archive/dev.zip')  # TODO: Does this work?
         run_config.environment.python.conda_dependencies = dependencies
         # Specify a docker base image since the default one is ubuntu 16.04.
         run_config.environment.docker.enabled = True
@@ -66,7 +65,9 @@ class AzureMLManager:
     def _generate_bootstrap(self, directory):
         filepath = os.path.join(directory, 'boot.py')
         with open(filepath, 'w') as f:
-            f.write("import mitorch; mitorch.azureml.AzureMLRunner().run()")
+            f.write('import os\n')
+            f.write('os.system("pip install https://github.com/shonohs/mitorch/archive/dev.zip")\n')
+            f.write('os.system("miamlrun")')
 
 
 def main():

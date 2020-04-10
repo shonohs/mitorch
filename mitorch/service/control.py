@@ -57,6 +57,15 @@ def process_trainings(client, aml_manager, db_uri):
             if not updated:
                 raise RuntimeError(f"Failed to update {job['_id']}")
 
+    queued_jobs = client.get_queued_trainings()
+    for job in queued_jobs:
+        status = aml_manager.query(job['run_id'])
+        if status == 'failed':
+            print(f"Training {job['run_id']}: {status}")
+            updated = client.update_training(job['_id'], {'status': 'failed'})
+            if not updated:
+                raise RuntimeError(f"Failed to update {job['_id']}")
+
 
 def process_jobs(client):
     raise NotImplementedError

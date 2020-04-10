@@ -46,6 +46,9 @@ class DatabaseClient:
     def get_running_trainings(self):
         return self.db.trainings.find({'status': 'running'})
 
+    def get_queued_trainings(self):
+        return self.db.trainings.find({'status': 'queued'})
+
     def update_training(self, training_id, set_data):
         assert isinstance(set_data, dict)
         result = self.db.trainings.update_one({'_id': training_id}, {'$set': set_data})

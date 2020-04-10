@@ -26,11 +26,10 @@ from mitorch.train import train
 
 
 class AzureMLRunner:
-    def __init__(self):
-        args = self.parse_args()
-        self.db_uri = args.db_uri
-        self.job_id = uuid.UUID(args.job_id)
-        self.client = DatabaseClient(args.db_uri)
+    def __init__(self, db_url, job_id):
+        self.db_url = db_url
+        self.job_id = job_id
+        self.client = DatabaseClient(self.db_url)
         self.dataset_base_uri = self.client.get_dataset_uri()
         self.storage_uri = self.client.get_storage_uri()
 
@@ -56,7 +55,7 @@ class AzureMLRunner:
 
             train_filepath, val_filepath = self.download_dataset(dataset_name, work_dir)
             weights_filepath = self.download_weights(config['base'], work_dir) if 'base' in config else None
-            logger = MongoDBLogger(self.db_uri, self.job_id, evaluation_filepath)
+            logger = MongoDBLogger(self.db_url, self.job_id, evaluation_filepath)
             train(config, train_filepath, val_filepath, weights_filepath, output_filepath, evaluation_filepath, False, logger)
 
             self.upload_files([output_filepath, evaluation_filepath])
@@ -111,17 +110,16 @@ class AzureMLRunner:
                 shutil.copyfileobj(r.raw, f)
         return filepath
 
-    @staticmethod
-    def parse_args():
-        parser = argparse.ArgumentParser("Run training on AzureML")
-        parser.add_argument('job_id', help="Guid for the target run")
-        parser.add_argument('db_uri', help="MongoDB URI for training management")
-
-        return parser.parse_args()
-
 
 def main():
-    AzureMLRunner().run()
+    parser = argparse.ArgumentParser("Run training on AzureML")
+    parser.add_argument('job_id', help="Guid for the target run")
+    parser.add_argument('db_url', help="MongoDB URI for training management")
+
+    args = parser.parse_args()
+
+    runner = AzureMLRunner(args.db_url, uuid.UUID(args.job_id))
+    runner.run()
 
 
 if __name__ == '__main__':
