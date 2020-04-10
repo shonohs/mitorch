@@ -6,7 +6,7 @@ setuptools.setup(name='mitorch',
                  author='shono',
                  description="MiTorch training framework",
                  url='https://github.com/shonohs/mitorch',
-                 packages=setuptools.find_namespace_packages(include=['mitorch.*']),
+                 packages=setuptools.find_namespace_packages(include=['mitorch', 'mitorch.*']),
                  install_requires=['mitorch-models', 'pymongo', 'pytorch_lightning', 'requests', 'torch', 'torchvision', 'sklearn', 'azureml-sdk'],
                  entry_points={
                      'console_scripts': [
