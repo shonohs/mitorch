@@ -66,8 +66,9 @@ class AzureMLManager:
         filepath = os.path.join(directory, 'boot.py')
         with open(filepath, 'w') as f:
             f.write('import os\n')
+            f.write('import sys\n')
             f.write('os.system("pip install https://github.com/shonohs/mitorch/archive/dev.zip")\n')
-            f.write('os.system("miamlrun")')
+            f.write('os.system("miamlrun " + " ".join(sys.argv[1:]))')
 
 
 def main():
