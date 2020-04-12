@@ -4,8 +4,9 @@ import pymongo
 
 
 class DatabaseClient:
-    def __init__(self, mongodb_uri):
-        client = pymongo.MongoClient(mongodb_uri, uuidRepresentation='standard')
+    def __init__(self, mongodb_url):
+        print(f"Connecting to the database: {mongodb_url}")
+        client = pymongo.MongoClient(mongodb_url, uuidRepresentation='standard')
         self.db = client.mitorch
 
     def add_job(self, config, priority):

@@ -27,6 +27,7 @@ from mitorch.train import train
 
 class AzureMLRunner:
     def __init__(self, db_url, job_id):
+        assert isinstance(job_id, uuid.UUID)
         self.db_url = db_url
         self.job_id = job_id
         self.client = DatabaseClient(self.db_url)

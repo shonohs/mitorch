@@ -12,7 +12,7 @@ class Environment:
             self._azureml_tenant_id, self._azureml_username, self._azureml_password = azureml_auth.split(':')
         else:
             self._azureml_tenant_id, self._azureml_username, self._azureml_password = None, None, None
-        self._db_uri = os.getenv('MITORCH_DB_URI')
+        self._db_uri = os.getenv('MITORCH_DATABASE_URL')
 
     @property
     def azureml_subscription_id(self):
@@ -47,5 +47,5 @@ class Environment:
     @property
     def db_uri(self):
         if not self._db_uri:
-            raise RuntimeError("MITORCH_DB_URI is not set")
+            raise RuntimeError("MITORCH_DATABASE_URL is not set")
         return self._db_uri
