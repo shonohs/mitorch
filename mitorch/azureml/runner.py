@@ -42,7 +42,7 @@ class AzureMLRunner:
             raise RuntimeError(f"Unknown job id {self.job_id}.")
 
         config = job['config']
-        dataset_name = job['dataset']
+        dataset_name = config['dataset']
 
         # Record machine setup.
         num_gpus = torch.cuda.device_count()

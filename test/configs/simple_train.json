@@ -12,10 +12,11 @@
 	"base_lr": 0.01
     },
     "augmentation": {
-        "train": "resize",
+        "train": "inception",
         "val": "resize"
     },
     "batch_size": 64,
     "input_size": 224,
-    "max_epochs": 100
+    "max_epochs": 100,
+    "dataset": "ImageNet"
 }
