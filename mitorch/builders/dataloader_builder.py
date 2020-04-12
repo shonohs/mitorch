@@ -1,5 +1,5 @@
 import torch
-from ..datasets import ImageDataset, ResizeTransform
+from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, InceptionTransform
 
 
 class DataLoaderBuilder:
@@ -21,8 +21,11 @@ class DataLoaderBuilder:
         return train_dataloader, val_dataloader
 
     def _build_augmentation(self, name, input_size):
-        # TODO: Add more augmentation
         if name == 'resize':
             return ResizeTransform(input_size)
+        elif name == 'resize_flip':
+            return ResizeFlipTransform(input_size)
+        elif name == 'inception':
+            return InceptionTransform(input_size)
         else:
             raise NotImplementedError(f"Non supported augmentation: {name}")

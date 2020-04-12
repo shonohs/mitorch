@@ -1,4 +1,4 @@
 from .image_dataset import ImageDataset
-from .transforms import ResizeTransform
+from .transforms import ResizeTransform, ResizeFlipTransform, InceptionTransform
 
-__all__ = ['ImageDataset', 'ResizeTransform']
+__all__ = ['ImageDataset', 'InceptionTransform', 'ResizeFlipTransform', 'ResizeTransform']
