@@ -42,7 +42,7 @@ class AzureMLManager:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             self._generate_bootstrap(temp_dir)
-            args = [str(job_id), db_uri]
+            args = [str(job_id), '"' + db_uri + '"']
             script_run_config = azureml.core.ScriptRunConfig(source_directory=temp_dir, script='boot.py', arguments=args, run_config=run_config)
             run = self.experiment.submit(config=script_run_config)
             run_id = run.get_details()['runId']

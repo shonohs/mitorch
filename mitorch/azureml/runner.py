@@ -50,7 +50,7 @@ class AzureMLRunner:
         self.client.start_training(self.job_id, num_gpus)
 
         with tempfile.TemporaryDirectory() as work_dir:
-            os.makedir(os.path.join(work_dir, 'outputs'))
+            os.mkdir(os.path.join(work_dir, 'outputs'))
             output_filepath = os.path.join(work_dir, 'outputs', 'model.pth')
             evaluation_filepath = os.path.join(work_dir, 'outputs', 'evaluation.json')
 
