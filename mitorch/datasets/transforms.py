@@ -1,4 +1,6 @@
 import inspect
+import random
+import PIL.ImageOps
 import torchvision
 
 
@@ -21,6 +23,21 @@ class Transform:
         return image, target
 
 
+class RandomHorizontalFlip:
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def __call__(self, image, target=None):
+        if random.randon() < self.p:
+            image = PIL.ImageOps.mirror(image)
+            if target:
+                target = [[t[0], 1 - t[3], t[2], 1 - t[1], t[4]] for t in target]
+        if target is not None:
+            return image, target
+        else:
+            return image
+
+
 class ResizeTransform(Transform):
     def __init__(self, input_size):
         transforms = [torchvision.transforms.Resize((input_size, input_size)),
@@ -41,7 +58,7 @@ class InceptionTransform(Transform):
 class ResizeFlipTransform(Transform):
     def __init__(self, input_size):
         transforms = [torchvision.transforms.Resize((input_size, input_size)),
-                      torchvision.transforms.RandomHorizontalFlip(),
+                      RandomHorizontalFlip(),
                       torchvision.transforms.ToTensor(),
                       torchvision.transforms.Normalize(INPUT_MEAN, [1, 1, 1], inplace=True)]
         super(ResizeTransform, self).__init__(transforms)

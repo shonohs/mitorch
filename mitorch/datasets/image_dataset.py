@@ -44,7 +44,11 @@ class ImageDataset:
         image_filepath, target = self.images[index]
         with self.reader.open(image_filepath, 'rb') as f:
             image = PIL.Image.open(f)
+        target = self._process_target(target, image.size)
         return self.transform(image, target)
+
+    def _process_target(self, target, image_size):
+        pass
 
     def _load_target(self, target):
         raise NotImplementedError
@@ -143,6 +147,10 @@ class ObjectDetectionDataset(ImageDataset):
                 l, x, y, x2, y2 = line.strip().split()
                 targets.append((int(l), float(x), float(y), float(x2), float(y2)))
         return targets
+
+    def _process_target(self, target, image_size):
+        w, h = image_size
+        return [[t[0], t[1] / w, t[2] / h, t[3] / w, t[4] / h] for t in target]
 
     @property
     def dataset_type(self):
