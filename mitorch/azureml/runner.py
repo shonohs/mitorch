@@ -16,11 +16,12 @@ import json
 import os
 import shutil
 import tempfile
+import time
 import urllib
 import uuid
 import requests
 import torch
-from mitorch.logger import MongoDBLogger
+from mitorch.logger import MongoDBLogger, StdoutLogger
 from mitorch.service import DatabaseClient
 from mitorch.train import train
 
@@ -56,8 +57,10 @@ class AzureMLRunner:
 
             train_filepath, val_filepath = self.download_dataset(dataset_name, work_dir)
             weights_filepath = self.download_weights(config['base'], work_dir) if 'base' in config else None
-            logger = MongoDBLogger(self.db_url, self.job_id, evaluation_filepath)
+            logger = [MongoDBLogger(self.db_url, self.job_id, evaluation_filepath), StdoutLogger()]
+            print("Starting the training.")
             train(config, train_filepath, val_filepath, weights_filepath, output_filepath, evaluation_filepath, False, logger)
+            print("Training completed.")
 
             self.upload_files([output_filepath, evaluation_filepath])
             with open(evaluation_filepath) as f:
@@ -106,9 +109,11 @@ class AzureMLRunner:
         filename = os.path.basename(urllib.parse.urlparse(url).path)
         filepath = os.path.join(directory, filename)
         print(f"Downloading {url} to {filepath}")
+        start = time.time()
         with requests.get(url, stream=True, allow_redirects=True) as r:
             with open(filepath, 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
+        print(f"Downloaded. {time.time() - start}s.")
         return filepath
 
 
