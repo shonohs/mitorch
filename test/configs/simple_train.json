@@ -9,7 +9,7 @@
     },
     "lr_scheduler": {
         "name": "cosine_annealing",
-	"base_lr": 0.01
+	"base_lr": 0.05
     },
     "augmentation": {
         "train": "inception",

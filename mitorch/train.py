@@ -7,7 +7,9 @@ from .logger import StdoutLogger
 from .mimodel import MiModel
 
 
-def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath, output_filepath, fast_dev_run, logger=StdoutLogger()):
+def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath, output_filepath, fast_dev_run, logger=None):
+    if not logger:
+        logger = StdoutLogger()
 
     if isinstance(config, str):
         with open(config) as f:

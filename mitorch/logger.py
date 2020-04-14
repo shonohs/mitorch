@@ -17,6 +17,17 @@ class StdoutLogger(LightningLoggerBase):
     def log_hyperparams(self, params):
         print(str(params))
 
+    @property
+    def experiment(self):
+        return None
+
+    @property
+    def name(self):
+        return "experiment"
+
+    @property
+    def version(self):
+        return 0
 
 class MongoDBLogger(LightningLoggerBase):
     def __init__(self, db_uri, training_id, evaluation_filepath=None):
@@ -47,3 +58,15 @@ class MongoDBLogger(LightningLoggerBase):
             model_versions = params['model_versions']
             print(f"model_versions: {model_versions}")
             self.client.mitorch.trainings.update_one({'_id': self.training_id}, {'$set': {'model_versions': model_versions}})
+
+    @property
+    def experiment(self):
+        return None
+
+    @property
+    def name(self):
+        return "experiment"
+
+    @property
+    def version(self):
+        return 0
