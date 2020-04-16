@@ -49,7 +49,7 @@ class ResizeTransform(Transform):
 class InceptionTransform(Transform):
     def __init__(self, input_size):
         transforms = [torchvision.transforms.RandomResizedCrop(input_size),
-                      torchvision.transforms.ColorJitter(brightness=0.1, contract=0.1, saturation=0.1, hue=0.1),
+                      torchvision.transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
                       torchvision.transforms.ToTensor(),
                       torchvision.transforms.Normalize(INPUT_MEAN, [1, 1, 1], inplace=True)]
         super(ResizeTransform, self).__init__(transforms)

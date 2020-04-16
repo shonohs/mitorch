@@ -112,7 +112,7 @@ class AzureMLRunner:
         start = time.time()
         with requests.get(url, stream=True, allow_redirects=True) as r:
             with open(filepath, 'wb') as f:
-                shutil.copyfileobj(r.raw, f)
+                shutil.copyfileobj(r.raw, f, length=4194304)  # 4MB
         print(f"Downloaded. {time.time() - start}s.")
         return filepath
 
