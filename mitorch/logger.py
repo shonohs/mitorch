@@ -29,6 +29,7 @@ class StdoutLogger(LightningLoggerBase):
     def version(self):
         return 0
 
+
 class MongoDBLogger(LightningLoggerBase):
     def __init__(self, db_uri, training_id, evaluation_filepath=None):
         super(MongoDBLogger, self).__init__()

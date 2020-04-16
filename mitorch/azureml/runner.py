@@ -59,7 +59,7 @@ class AzureMLRunner:
             weights_filepath = self.download_weights(config['base'], work_dir) if 'base' in config else None
             logger = [MongoDBLogger(self.db_url, self.job_id, evaluation_filepath), StdoutLogger()]
             print("Starting the training.")
-            train(config, train_filepath, val_filepath, weights_filepath, output_filepath, evaluation_filepath, False, logger)
+            train(config, train_filepath, val_filepath, weights_filepath, output_filepath, False, logger)
             print("Training completed.")
 
             self.upload_files([output_filepath, evaluation_filepath])
