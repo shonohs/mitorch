@@ -13,7 +13,10 @@ class MiModel(pl.LightningModule):
         max_iters = len(self._train_dataloader) * config['max_epochs']
         self.lr_scheduler = LrSchedulerBuilder(config).build(self.optimizer, max_iters)
         self.evaluator = self._get_evaluator(self._train_dataloader.dataset.dataset_type)
-        self.logger.log_hyperparams({'model_versions': self.model.version})
+
+    @property
+    def version(self):
+        return self.model.version
 
     @staticmethod
     def _get_evaluator(dataset_type):
