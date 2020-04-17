@@ -19,8 +19,11 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
     distributed_backend = 'dp' if torch.cuda.is_available() else None
 
     model = MiModel(config, train_dataset_filepath, val_dataset_filepath, weights_filepath)
-    for l in logger if isinstance(logger, list) else [logger]:
-        l.log_hyperparams({'model_versions': model.version})
+    try:
+        for l in logger if isinstance(logger, list) else [logger]:
+            l.log_hyperparams({'model_versions': model.version})
+    except Exception as e:
+        print(e)
 
     trainer = pl.Trainer(fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend=distributed_backend, checkpoint_callback=False, logger=logger)
 
