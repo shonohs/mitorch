@@ -13,6 +13,9 @@ class Transform:
         self.num_params = [len(inspect.signature(t).parameters) for t in transforms]
 
     def __call__(self, image, target):
+        assert image is not None
+        assert target is not None
+
         for t, n in zip(self.transforms, self.num_params):
             if n == 1:
                 image = t(image)
@@ -20,6 +23,8 @@ class Transform:
                 image, target = t(image, target)
             else:
                 raise NotImplementedError(f"Non supported number of params: {n}")
+        assert image is not None
+        assert target is not None
         return image, target
 
 
@@ -27,15 +32,12 @@ class RandomHorizontalFlip:
     def __init__(self, p=0.5):
         self.p = p
 
-    def __call__(self, image, target=None):
+    def __call__(self, image, target):
         if random.randon() < self.p:
             image = PIL.ImageOps.mirror(image)
-            if target:
+            if target and isinstance(target[0], list):
                 target = [[t[0], 1 - t[3], t[2], 1 - t[1], t[4]] for t in target]
-        if target is not None:
-            return image, target
-        else:
-            return image
+        return image, target
 
 
 class ResizeTransform(Transform):

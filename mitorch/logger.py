@@ -2,7 +2,7 @@ import json
 import uuid
 import pymongo
 from pytorch_lightning.loggers import LightningLoggerBase, rank_zero_only
-
+import torch
 
 class StdoutLogger(LightningLoggerBase):
     @rank_zero_only
@@ -11,7 +11,7 @@ class StdoutLogger(LightningLoggerBase):
 
     @rank_zero_only
     def log_test_result(self, results):
-        print(f"results: {json.dumps(results)}")
+        print(f"results: {results}")
 
     @rank_zero_only
     def log_hyperparams(self, params):
@@ -50,8 +50,12 @@ class MongoDBLogger(LightningLoggerBase):
     @rank_zero_only
     def log_test_result(self, results):
         if self.evaluation_filepath:
+            new_results = {}
+            for key in results:
+                new_results[key] = results[key].tolist() if isinstance(results[key], torch.Tensor) else results[key]
+
             with open(self.evaluation_filepath, 'w') as f:
-                json.dump(results, f)
+                json.dump(new_results, f)
 
     @rank_zero_only
     def log_hyperparams(self, params):

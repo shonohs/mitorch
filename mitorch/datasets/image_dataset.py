@@ -28,10 +28,10 @@ class ImageDataset:
         if labels_filepath.exists():
             with open(labels_filepath) as f:
                 labels = [l.strip() for l in f.readlines()]
-                assert len(labels) >= max_label
+                assert len(labels) > max_label
                 return labels
         else:
-            return [f'label_{i}' for i in range(max_label)]
+            return [f'label_{i}' for i in range(max_label + 1)]
 
     @property
     def labels(self):
@@ -45,10 +45,11 @@ class ImageDataset:
         with self.reader.open(image_filepath, 'rb') as f:
             image = PIL.Image.open(f)
         target = self._process_target(target, image.size)
+        assert target is not None
         return self.transform(image, target)
 
     def _process_target(self, target, image_size):
-        pass
+        return target
 
     def _load_target(self, target):
         raise NotImplementedError

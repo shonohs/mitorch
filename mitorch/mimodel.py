@@ -15,7 +15,7 @@ class MiModel(pl.LightningModule):
         self.evaluator = self._get_evaluator(self._train_dataloader.dataset.dataset_type)
 
     @property
-    def version(self):
+    def model_version(self):
         return self.model.version
 
     @staticmethod
@@ -30,7 +30,7 @@ class MiModel(pl.LightningModule):
 
     def configure_optimizers(self):
         # lr_scheduler.step() is called after every training steps.
-        return self.optimizer, {'scheduler': self.lr_scheduler, 'interval': 'step'}
+        return {'optimizer': self.optimizer, 'lr_scheduler': {'scheduler': self.lr_scheduler, 'interval': 'step'}}
 
     def train_dataloader(self):
         return self._train_dataloader
@@ -57,7 +57,7 @@ class MiModel(pl.LightningModule):
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs):
-        results = self.evaluator.get_reports()
+        results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
         results['val_loss'] = torch.tensor([o['val_loss'] for o in outputs]).mean()
@@ -73,7 +73,7 @@ class MiModel(pl.LightningModule):
         return {'test_loss': loss}
 
     def test_epoch_end(self, outputs):
-        results = self.evaluator.get_reports()
+        results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
         results['test_loss'] = torch.tensor([o['test_loss'] for o in outputs]).mean()
@@ -84,5 +84,8 @@ class MiModel(pl.LightningModule):
         return self.model(x)
 
     def save(self, filepath):
+        assert isinstance(filepath, str)
+
         state_dict = self.model.state_dict()
+        print(f"Saving a model to {filepath}")
         torch.save(state_dict, filepath)

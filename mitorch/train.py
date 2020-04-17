@@ -21,7 +21,7 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
     model = MiModel(config, train_dataset_filepath, val_dataset_filepath, weights_filepath)
     try:
         for l in logger if isinstance(logger, list) else [logger]:
-            l.log_hyperparams({'model_versions': model.version})
+            l.log_hyperparams({'model_versions': model.model_version})
     except Exception as e:
         print(e)
 
@@ -29,7 +29,8 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
 
     trainer.fit(model)
     trainer.test(model)
-    model.save(output_filepath)
+    if output_filepath:
+        model.save(output_filepath)
 
 
 def main():
