@@ -68,6 +68,12 @@ def process_trainings(client, aml_manager, db_uri):
 
 
 def process_jobs(client):
+    # Get all active jobs
+
+    # For each job
+    # Check the last experiment status
+    # If it's done, check the job status. If still active, queue a next training.
+    # Update the record
     raise NotImplementedError
 
 

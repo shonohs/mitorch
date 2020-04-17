@@ -55,7 +55,7 @@ class MongoDBLogger(LightningLoggerBase):
 
     @rank_zero_only
     def log_hyperparams(self, params):
-        if 'model_versions' in params:
+        if params and 'model_versions' in params:
             model_versions = params['model_versions']
             print(f"model_versions: {model_versions}")
             self.client.mitorch.trainings.update_one({'_id': self.training_id}, {'$set': {'model_versions': model_versions}})
