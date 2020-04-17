@@ -43,7 +43,7 @@ class ResizeTransform(Transform):
         transforms = [torchvision.transforms.Resize((input_size, input_size)),
                       torchvision.transforms.ToTensor(),
                       torchvision.transforms.Normalize(INPUT_MEAN, [1, 1, 1], inplace=True)]
-        super(ResizeTransform, self).__init__(transforms)
+        super().__init__(transforms)
 
 
 class InceptionTransform(Transform):
@@ -52,7 +52,7 @@ class InceptionTransform(Transform):
                       torchvision.transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
                       torchvision.transforms.ToTensor(),
                       torchvision.transforms.Normalize(INPUT_MEAN, [1, 1, 1], inplace=True)]
-        super(ResizeTransform, self).__init__(transforms)
+        super().__init__(transforms)
 
 
 class ResizeFlipTransform(Transform):
@@ -61,4 +61,4 @@ class ResizeFlipTransform(Transform):
                       RandomHorizontalFlip(),
                       torchvision.transforms.ToTensor(),
                       torchvision.transforms.Normalize(INPUT_MEAN, [1, 1, 1], inplace=True)]
-        super(ResizeTransform, self).__init__(transforms)
+        super().__init__(transforms)
