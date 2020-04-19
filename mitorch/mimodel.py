@@ -60,6 +60,7 @@ class MiModel(pl.LightningModule):
         results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
+        print(outputs)
         results['val_loss'] = torch.tensor([o['val_loss'] for o in outputs]).mean()
         return {'log': results}
 
