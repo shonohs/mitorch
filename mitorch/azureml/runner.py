@@ -53,18 +53,14 @@ class AzureMLRunner:
         with tempfile.TemporaryDirectory() as work_dir:
             os.mkdir(os.path.join(work_dir, 'outputs'))
             output_filepath = os.path.join(work_dir, 'outputs', 'model.pth')
-            evaluation_filepath = os.path.join(work_dir, 'outputs', 'evaluation.json')
-
             train_filepath, val_filepath = self.download_dataset(dataset_name, work_dir)
             weights_filepath = self.download_weights(config['base'], work_dir) if 'base' in config else None
-            logger = [MongoDBLogger(self.db_url, self.job_id, evaluation_filepath), StdoutLogger()]
+            logger = [MongoDBLogger(self.db_url, self.job_id), StdoutLogger()]
             print("Starting the training.")
             train(config, train_filepath, val_filepath, weights_filepath, output_filepath, False, logger)
             print("Training completed.")
 
-            self.upload_files([output_filepath, evaluation_filepath])
-            with open(evaluation_filepath) as f:
-                evaluation = json.load(f)
+            self.upload_files([output_filepath])
             self.client.complete_training(self.job_id, evaluation)
 
     def download_dataset(self, dataset_name, directory):

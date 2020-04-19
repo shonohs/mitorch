@@ -62,9 +62,13 @@ class DatabaseClient:
         return result.modified_count == 1
 
     def complete_training(self, training_id, evaluation):
+        # Get the test metrics
+        result = self.db.training_metrics.find_one({'tid': training_id, 'm.test_loss': {'$exists': True}})
+        metrics = result['m']
+
         result = self.db.trainings.update_one({'_id': training_id}, {'$set': {'status': 'completed',
                                                                               'completed_at': datetime.datetime.utcnow(),
-                                                                              'evaluation': evaluation}})
+                                                                              'evaluation': metrics}})
         return result.modified_count == 1
 
     def find_dataset_by_name(self, dataset_name, version=None):

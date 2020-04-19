@@ -13,6 +13,7 @@ class MiModel(pl.LightningModule):
         max_iters = len(self._train_dataloader) * config['max_epochs']
         self.lr_scheduler = LrSchedulerBuilder(config).build(self.optimizer, max_iters)
         self.evaluator = self._get_evaluator(self._train_dataloader.dataset.dataset_type)
+        self.train_epoch = 0
 
     @property
     def model_version(self):
@@ -47,6 +48,12 @@ class MiModel(pl.LightningModule):
         loss = self.criterion(output, target)
         return {'loss': loss}
 
+    def training_epoch_end(self, outputs):
+        train_loss = torch.cat([o['loss'] for o in outputs], dim=0).mean()
+        self.logger.log_custom_metrics({'train_loss': train_loss}, self.train_epoch)
+        self.train_epoch += 1
+        return
+
     def validation_step(self, batch, batch_index):
         image, target = batch
         output = self.forward(image)
@@ -61,6 +68,7 @@ class MiModel(pl.LightningModule):
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
         results['val_loss'] = torch.cat([o['val_loss'] for o in outputs], dim=0).mean()
+        self.logger.log_custom_metrics(results, self.train_epoch)
         return {'log': results}
 
     def test_step(self, batch, batch_index):
@@ -69,7 +77,6 @@ class MiModel(pl.LightningModule):
         loss = self.criterion(output, target)
         predictions = self.predictor(output)
         self.evaluator.add_predictions(predictions, target)
-
         return {'test_loss': loss}
 
     def test_epoch_end(self, outputs):
@@ -77,7 +84,7 @@ class MiModel(pl.LightningModule):
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
         results['test_loss'] = torch.cat([o['test_loss'] for o in outputs], dim=0).mean()
-        self.logger.log_test_result(results)
+        self.logger.log_custom_metrics(results, self.train_epoch)
         return {'log': results}
 
     def forward(self, x):
