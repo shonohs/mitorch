@@ -67,6 +67,7 @@ class AzureMLManager:
         with open(filepath, 'w') as f:
             f.write('import os\n')
             f.write('import sys\n')
+            f.write('os.system("pip install https://github.com/shonohs/mitorch_models/archive/master.zip")\n')
             f.write('os.system("pip install https://github.com/shonohs/mitorch/archive/dev.zip")\n')
             f.write('os.system("miamlrun " + " ".join(sys.argv[1:]))')
 
