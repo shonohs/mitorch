@@ -60,8 +60,7 @@ class MiModel(pl.LightningModule):
         results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
-        print(outputs)
-        results['val_loss'] = torch.tensor([o['val_loss'] for o in outputs]).mean()
+        results['val_loss'] = torch.cat([o['val_loss'] for o in outputs], dim=0).mean()
         return {'log': results}
 
     def test_step(self, batch, batch_index):
@@ -77,7 +76,7 @@ class MiModel(pl.LightningModule):
         results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
-        results['test_loss'] = torch.tensor([o['test_loss'] for o in outputs]).mean()
+        results['test_loss'] = torch.cat([o['test_loss'] for o in outputs], dim=0).mean()
         self.logger.log_test_result(results)
         return {'log': results}
 
