@@ -36,9 +36,10 @@ class StdoutLogger(LightningLoggerBase):
 
 class MongoDBLogger(LightningLoggerBase):
     class ExperimentLogger:
-        def __init__(self, rank, log_collection):
+        def __init__(self, rank, log_collection, training_id):
             self.rank = rank
             self.log_collection = log_collection
+            self.training_id = training_id
 
         @rank_zero_only
         def log_epoch_metrics(self, metrics, epoch):
@@ -65,7 +66,7 @@ class MongoDBLogger(LightningLoggerBase):
 
     @property
     def experiment(self):
-        return MongoDBLogger.ExperimentLogger(self.rank, self.log_collection)
+        return MongoDBLogger.ExperimentLogger(self.rank, self.log_collection, self.training_id)
 
     @property
     def name(self):
