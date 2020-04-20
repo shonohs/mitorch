@@ -50,7 +50,7 @@ class MiModel(pl.LightningModule):
 
     def training_epoch_end(self, outputs):
         train_loss = torch.cat([o['loss'] if o['loss'].shape else o['loss'].unsqueeze(0) for o in outputs], dim=0).mean()
-        self.logger.experiment.log_epoch_metrics({'train_loss': train_loss}, self.train_epoch)
+        self._log_epoch_metrics({'train_loss': train_loss}, self.train_epoch)
         self.train_epoch += 1
         return {}
 
@@ -69,7 +69,7 @@ class MiModel(pl.LightningModule):
         results = {key: torch.tensor(value) for key, value in results.items()}
         print(outputs)
         results['val_loss'] = torch.cat([o['val_loss'] if o['val_loss'].shape else o['val_loss'].unsqueeze(0) for o in outputs], dim=0).mean()
-        self.logger.experiment.log_epoch_metrics(results, self.train_epoch)
+        self._log_epoch_metrics(results, self.train_epoch)
         return {'log': results}
 
     def test_step(self, batch, batch_index):
@@ -85,7 +85,7 @@ class MiModel(pl.LightningModule):
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
         results['test_loss'] = torch.cat([o['test_loss'] if o['test_loss'].shape else o['test_loss'].unsqueeze(0) for o in outputs], dim=0).mean()
-        self.logger.experiment.log_epoch_metrics(results, self.train_epoch)
+        self._log_epoch_metrics(results, self.train_epoch)
         return {'log': results}
 
     def forward(self, x):
@@ -97,3 +97,8 @@ class MiModel(pl.LightningModule):
         state_dict = self.model.state_dict()
         print(f"Saving a model to {filepath}")
         torch.save(state_dict, filepath)
+
+    def _log_epoch_metrics(self, metrics, epoch):
+        loggers = self.logger.experiment if isinstance(self.logger.experiment, list) else [self.logger.experiment]
+        for l in loggers:
+            l.log_epoch_metrics(metrics, epoch)
