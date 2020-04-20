@@ -32,7 +32,7 @@ class AzureMLRunner:
         self.job_id = job_id
         self.client = DatabaseClient(self.db_url)
         self.dataset_base_uri = self.client.get_dataset_uri()
-        self.storage_uri = self.client.get_storage_uri()
+        self.blob_storage_url = self.client.get_storage_uri()
 
     def run(self):
         """First method to be run on AzureML instance"""
@@ -77,12 +77,12 @@ class AzureMLRunner:
 
     def download_weights(self, base_job_id, directory):
         blob_path = os.path.join(base_job_id.hex, 'model.pth')
-        return self._download_blob_file(self.storage_blob_uri, blob_path, directory)
+        return self._download_blob_file(self.blob_storage_url, blob_path, directory)
 
     def upload_files(self, files):
         for filepath in files:
             blob_path = os.path.join(self.job_id.hex, os.path.basename(filepath))
-            self._upload_blob_file(self.storage_blob_uri, filepath, blob_path)
+            self._upload_blob_file(self.blob_storage_url, filepath, blob_path)
 
     @staticmethod
     def _upload_blob_file(base_blob_uri, local_filepath, blob_path):

@@ -1,3 +1,4 @@
+import datetime
 import uuid
 import pymongo
 from pytorch_lightning.loggers import LightningLoggerBase, rank_zero_only
@@ -11,11 +12,12 @@ class StdoutLogger(LightningLoggerBase):
 
         @rank_zero_only
         def log_epoch_metrics(self, metrics, epoch):
-            print(f"{epoch}: {metrics}")
+            print(f"{datetime.datetime.now()}: {epoch}: {metrics}")
 
     @rank_zero_only
     def log_metrics(self, metrics, step):
-        print(f"{step}: {metrics}")
+        if metrics:
+            print(f"{datetime.datetime.now()}: {step}: {metrics}")
 
     @rank_zero_only
     def log_hyperparams(self, params):
