@@ -49,10 +49,10 @@ class MiModel(pl.LightningModule):
         return {'loss': loss}
 
     def training_epoch_end(self, outputs):
-        train_loss = torch.cat([o['loss'] for o in outputs], dim=0).mean()
-        self.logger.log_custom_metrics({'train_loss': train_loss}, self.train_epoch)
+        train_loss = torch.cat([o['loss'] if o['loss'].shape else o['loss'].unsqueeze(0) for o in outputs], dim=0).mean()
+        self.logger.experiment.log_epoch_metrics({'train_loss': train_loss}, self.train_epoch)
         self.train_epoch += 1
-        return
+        return {}
 
     def validation_step(self, batch, batch_index):
         image, target = batch
@@ -67,8 +67,9 @@ class MiModel(pl.LightningModule):
         results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
-        results['val_loss'] = torch.cat([o['val_loss'] for o in outputs], dim=0).mean()
-        self.logger.log_custom_metrics(results, self.train_epoch)
+        print(outputs)
+        results['val_loss'] = torch.cat([o['val_loss'] if o['val_loss'].shape else o['val_loss'].unsqueeze(0) for o in outputs], dim=0).mean()
+        self.logger.experiment.log_epoch_metrics(results, self.train_epoch)
         return {'log': results}
 
     def test_step(self, batch, batch_index):
@@ -83,8 +84,8 @@ class MiModel(pl.LightningModule):
         results = self.evaluator.get_report()
         self.evaluator.reset()
         results = {key: torch.tensor(value) for key, value in results.items()}
-        results['test_loss'] = torch.cat([o['test_loss'] for o in outputs], dim=0).mean()
-        self.logger.log_custom_metrics(results, self.train_epoch)
+        results['test_loss'] = torch.cat([o['test_loss'] if o['test_loss'].shape else o['test_loss'].unsqueeze(0) for o in outputs], dim=0).mean()
+        self.logger.experiment.log_epoch_metrics(results, self.train_epoch)
         return {'log': results}
 
     def forward(self, x):

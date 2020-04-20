@@ -22,7 +22,8 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
     for l in logger if isinstance(logger, list) else [logger]:
         l.log_hyperparams({'model_versions': model.model_version})
 
-    trainer = pl.Trainer(fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend=distributed_backend, checkpoint_callback=False, logger=logger, progress_bar_refresh_rate=100, check_val_every_n_epoch=10)
+    trainer = pl.Trainer(max_epochs=config['max_epochs'], fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend=distributed_backend,
+                         checkpoint_callback=False, logger=logger, progress_bar_refresh_rate=100, check_val_every_n_epoch=10)
 
     trainer.fit(model)
     trainer.test(model)

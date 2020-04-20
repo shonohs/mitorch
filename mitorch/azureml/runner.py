@@ -12,7 +12,6 @@ The job of this script is:
 - Upload the trained model to Azure Storage
 """
 import argparse
-import json
 import os
 import shutil
 import tempfile
@@ -46,6 +45,8 @@ class AzureMLRunner:
         config = job['config']
         dataset_name = config['dataset']
 
+        print(config)
+
         # Record machine setup.
         num_gpus = torch.cuda.device_count()
         self.client.start_training(self.job_id, num_gpus)
@@ -61,7 +62,7 @@ class AzureMLRunner:
             print("Training completed.")
 
             self.upload_files([output_filepath])
-            self.client.complete_training(self.job_id, evaluation)
+            self.client.complete_training(self.job_id)
 
     def download_dataset(self, dataset_name, directory):
         dataset = self.client.find_dataset_by_name(dataset_name)

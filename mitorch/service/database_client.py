@@ -61,7 +61,7 @@ class DatabaseClient:
                                                                               'machine': {'num_gpus': num_gpus}}})
         return result.modified_count == 1
 
-    def complete_training(self, training_id, evaluation):
+    def complete_training(self, training_id):
         # Get the test metrics
         result = self.db.training_metrics.find_one({'tid': training_id, 'm.test_loss': {'$exists': True}})
         metrics = result['m']
