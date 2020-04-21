@@ -12,7 +12,8 @@ class StdoutLogger(LightningLoggerBase):
 
         @rank_zero_only
         def log_epoch_metrics(self, metrics, epoch):
-            print(f"{datetime.datetime.now()}: {epoch}: {metrics}")
+            metrics = {key: value.tolist() if isinstance(value, torch.Tensor) else value for key, value in metrics.items()}
+            print(f"{datetime.datetime.now()}: Epoch {epoch}: {metrics}")
 
     @rank_zero_only
     def log_metrics(self, metrics, step):

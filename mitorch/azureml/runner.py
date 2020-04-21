@@ -86,7 +86,7 @@ class AzureMLRunner:
 
     @staticmethod
     def _upload_blob_file(base_blob_uri, local_filepath, blob_path):
-        parts = urllib.parse_urlparse(base_blob_uri)
+        parts = urllib.parse.urlparse(base_blob_uri)
         path = os.path.join(parts[2], blob_path)
         url = urllib.parse.urlunparse((parts[0], parts[1], path, parts[3], parts[4], parts[5]))
         print(f"Uploading {local_filepath} to {url}")
