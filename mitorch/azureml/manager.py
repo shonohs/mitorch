@@ -43,6 +43,7 @@ class AzureMLManager:
         # Specify a docker base image since the default one is ubuntu 16.04.
         run_config.environment.docker.enabled = True
         run_config.environment.docker.base_image = 'mcr.microsoft.com/azureml/base-gpu:openmpi3.1.2-cuda10.1-cudnn7-ubuntu18.04'
+        run_config.environment.docker.shm_size = '16g'
 
         with tempfile.TemporaryDirectory() as temp_dir:
             self._generate_bootstrap(temp_dir)
@@ -57,8 +58,12 @@ class AzureMLManager:
         Returns:
             (str) running, failed, or completed.
         """
-        run = azureml.core.run.Run(self.experiment, run_id)
-        return run.get_status().lower() if run else None
+        try:
+            run = azureml.core.run.Run(self.experiment, run_id)
+            return run.get_status().lower()
+        except Exception as e:
+            print(e)
+            return None
 
     def get_num_available_nodes(self):
         """Get the number of available nodes"""

@@ -15,8 +15,8 @@ class DataLoaderBuilder:
         val_dataset = ImageDataset.from_file(val_dataset_filepath, val_augmentation)
 
         batch_size = self.config['batch_size']
-        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=4, pin_memory=True)
-        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=4, pin_memory=True)
+        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=8, pin_memory=True)
+        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=8, pin_memory=True)
 
         return train_dataloader, val_dataloader
 
