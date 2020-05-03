@@ -30,6 +30,10 @@ class AzureMLManager:
         if not self.cluster:
             raise RuntimeError(f"Cluster {cluster_name} doesn't exist in workspace {workspace_name}")
 
+    @property
+    def region(self):
+        return os.getenv('MITORCH_AZUREML_REGION')
+
     def submit(self, db_uri, job_id):
         run_config = azureml.core.runconfig.RunConfiguration()
         run_config.target = self.cluster
@@ -54,7 +58,7 @@ class AzureMLManager:
             (str) running, failed, or completed.
         """
         run = azureml.core.run.Run(self.experiment, run_id)
-        return run.get_status().lower()
+        return run.get_status().lower() if run else None
 
     def get_num_available_nodes(self):
         """Get the number of available nodes"""

@@ -31,7 +31,6 @@ class AzureMLRunner:
         self.db_url = db_url
         self.job_id = job_id
         self.client = DatabaseClient(self.db_url)
-        self.dataset_base_uri = self.client.get_dataset_uri()
         self.blob_storage_url = self.client.get_storage_uri()
 
     def run(self):
@@ -44,8 +43,11 @@ class AzureMLRunner:
 
         config = job['config']
         dataset_name = config['dataset']
-
+        region = job['region']
         print(config)
+
+
+        self.dataset_base_uri = self.client.get_dataset_uri(region)
 
         # Record machine setup.
         num_gpus = torch.cuda.device_count()

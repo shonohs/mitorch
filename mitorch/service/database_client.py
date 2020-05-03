@@ -83,9 +83,10 @@ class DatabaseClient:
         """Weights blob url with a sas token for read/write access."""
         return self._get_settings('storage_uri')
 
-    def get_dataset_uri(self):
+    def get_dataset_uri(self, region='wus2'):
         """Dataset blob url with a sas token for readonly access."""
-        return self._get_settings('dataset_uri')
+        dataset_settings = self._get_settings('dataset_url')
+        return dataset_settings.get(region)
 
     def _get_settings(self, key):
         record = self.db.settings.find_one({'key': key})
