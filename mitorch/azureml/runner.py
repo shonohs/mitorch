@@ -92,7 +92,7 @@ class AzureMLRunner:
         print(f"Uploading {local_filepath} to {url}")
         with open(local_filepath, 'rb') as f:
             data = f.read()
-        requests.put(url=url, data=data, headers={'Content-Type': 'application/octet-stream'})
+        requests.put(url=url, data=data, headers={'Content-Type': 'application/octet-stream', 'x-ms-blob-type': 'BlockBlob'})
 
     @staticmethod
     def _download_blob_file(base_blob_uri, blob_path, directory):
