@@ -9,13 +9,13 @@
     },
     "lr_scheduler": {
         "name": "cosine_annealing",
-	"base_lr": 0.05
+	"base_lr": 0.1
     },
     "augmentation": {
         "train": "inception",
         "val": "resize"
     },
-    "batch_size": 64,
+    "batch_size": 256,
     "input_size": 224,
     "max_epochs": 100,
     "dataset": "ImageNet"

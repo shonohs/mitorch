@@ -1,15 +1,25 @@
 """Train a model based on the given config."""
 import argparse
 import json
+import random
+import numpy
 import pytorch_lightning as pl
 import torch
 from .logger import StdoutLogger
 from .mimodel import MiModel
 
 
+def set_random_seed(seed):
+    torch.manual_seed(seed)
+    numpy.random.seed(seed)
+    random.seed(seed)
+
+
 def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath, output_filepath, fast_dev_run, logger=None):
     if not logger:
         logger = StdoutLogger()
+
+    set_random_seed(0)
 
     if isinstance(config, str):
         with open(config) as f:

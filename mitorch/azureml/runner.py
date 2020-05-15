@@ -46,7 +46,6 @@ class AzureMLRunner:
         region = job['region']
         print(config)
 
-
         self.dataset_base_uri = self.client.get_dataset_uri(region)
 
         # Record machine setup.
