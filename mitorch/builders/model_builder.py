@@ -39,7 +39,7 @@ class ModelBuilder:
                 max_depth = max(depth, max_depth)
             return max_depth
 
-        weights = torch.load(weights_filepath)
+        weights = torch.load(weights_filepath, map_location=torch.device('cpu'))
         src_depth = _get_depth(weights.keys())
         dst_depth = _get_depth(model.state_dict().keys())
         print(f"Source depth: {src_depth}, Destination depth: {dst_depth}")
