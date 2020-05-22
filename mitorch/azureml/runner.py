@@ -56,7 +56,7 @@ class AzureMLRunner:
             os.mkdir(os.path.join(work_dir, 'outputs'))
             output_filepath = os.path.join(work_dir, 'outputs', 'model.pth')
             train_filepath, val_filepath = self.download_dataset(dataset_name, work_dir)
-            weights_filepath = self.download_weights(config['base'], work_dir) if 'base' in config else None
+            weights_filepath = self.download_weights(uuid.UUID(config['base']), work_dir) if 'base' in config else None
             logger = [MongoDBLogger(self.db_url, self.job_id), StdoutLogger()]
             print("Starting the training.")
             train(config, train_filepath, val_filepath, weights_filepath, output_filepath, False, logger)
