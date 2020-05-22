@@ -2,6 +2,15 @@ import torch
 from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform
 
 
+def _default_collate(batch):
+    image, target = zip(*batch)
+    image = torch.stack(image, 0)
+    if isinstance(target[0], (list, tuple)) and not isinstance(target[0][0], (list, tuple)):  # Multilabel classification
+        raise NotImplementedError()
+
+    return image, target
+
+
 class DataLoaderBuilder:
     def __init__(self, config):
         self.augmentation_config = config['augmentation']
@@ -16,8 +25,8 @@ class DataLoaderBuilder:
         val_dataset = ImageDataset.from_file(val_dataset_filepath, val_augmentation)
 
         batch_size = self.config['batch_size']
-        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=8, pin_memory=True)
-        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=8, pin_memory=True)
+        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=8, pin_memory=True, collate_fn=_default_collate)
+        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=8, pin_memory=True, collate_fn=_default_collate)
 
         return train_dataloader, val_dataloader
 
