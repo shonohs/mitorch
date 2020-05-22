@@ -1,5 +1,5 @@
 import torch
-from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, InceptionTransform
+from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform
 
 
 class DataLoaderBuilder:
@@ -8,10 +8,11 @@ class DataLoaderBuilder:
         self.config = config
 
     def build(self, train_dataset_filepath, val_dataset_filepath):
-        train_augmentation = self._build_augmentation(self.augmentation_config['train'], self.config['input_size'])
+        is_object_detection = self.config['task_type'] == 'object_detection'
+        train_augmentation = self.build_augmentation(self.augmentation_config['train'], self.config['input_size'], is_object_detection)
         train_dataset = ImageDataset.from_file(train_dataset_filepath, train_augmentation)
 
-        val_augmentation = self._build_augmentation(self.augmentation_config['val'], self.config['input_size'])
+        val_augmentation = self.build_augmentation(self.augmentation_config['val'], self.config['input_size'], is_object_detection)
         val_dataset = ImageDataset.from_file(val_dataset_filepath, val_augmentation)
 
         batch_size = self.config['batch_size']
@@ -20,12 +21,13 @@ class DataLoaderBuilder:
 
         return train_dataloader, val_dataloader
 
-    def _build_augmentation(self, name, input_size):
-        if name == 'resize':
-            return ResizeTransform(input_size)
-        elif name == 'resize_flip':
-            return ResizeFlipTransform(input_size)
-        elif name == 'inception':
-            return InceptionTransform(input_size)
-        else:
+    @staticmethod
+    def build_augmentation(name, input_size, is_object_detection):
+        augmentation_class = {'resize': ResizeTransform,
+                              'resize_flip': ResizeFlipTransform,
+                              'random_resize': RandomResizedCropTransform}.get(name)
+
+        if not augmentation_class:
             raise NotImplementedError(f"Non supported augmentation: {name}")
+
+        return augmentation_class(input_size, is_object_detection)

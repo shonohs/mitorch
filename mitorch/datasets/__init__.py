@@ -1,4 +1,4 @@
 from .image_dataset import ImageDataset
-from .transforms import ResizeTransform, ResizeFlipTransform, InceptionTransform
+from .albumentations_transforms import RandomResizedCropTransform, ResizeTransform, ResizeFlipTransform
 
-__all__ = ['ImageDataset', 'InceptionTransform', 'ResizeFlipTransform', 'ResizeTransform']
+__all__ = ['ImageDataset', 'ResizeFlipTransform', 'ResizeTransform', 'RandomResizedCropTransform']

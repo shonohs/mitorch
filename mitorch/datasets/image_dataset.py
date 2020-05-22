@@ -151,8 +151,7 @@ class ObjectDetectionDataset(ImageDataset):
         return targets
 
     def _process_target(self, target, image_size):
-        w, h = image_size
-        return [[t[0], t[1] / w, t[2] / h, t[3] / w, t[4] / h] for t in target]
+        return target
 
     @property
     def dataset_type(self):
