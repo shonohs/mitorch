@@ -87,8 +87,7 @@ class MiModel(pl.LightningModule):
         return {'log': results}
 
     def forward(self, x):
-        print(x.device)
-        print(self.model.device)
+        print(f"{next(self.model.parameters()).device)} {x.device}")
         return self.model(x)
 
     def save(self, filepath):
