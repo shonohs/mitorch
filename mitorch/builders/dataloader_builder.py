@@ -1,14 +1,15 @@
+import functools
 import torch
 from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform
 
 
-def _default_collate(batch):
+def _default_collate(task_type, batch):
     image, target = zip(*batch)
     image = torch.stack(image, 0)
-    # Not implemented: Multiclass classification
-    print(f"len(batch)={len(batch)}")
-    print(f"image.shape={image.shape}")
-    print(f"len(target)={len(target)}")
+    if task_type == 'multiclass_classification':
+        target = torch.tensor(target)
+    elif task_type == 'multilabel_classification':
+        raise NotImplementedError
     return image, target
 
 
@@ -26,8 +27,9 @@ class DataLoaderBuilder:
         val_dataset = ImageDataset.from_file(val_dataset_filepath, val_augmentation)
 
         batch_size = self.config['batch_size']
-        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=8, pin_memory=True, collate_fn=_default_collate)
-        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=8, pin_memory=True, collate_fn=_default_collate)
+        collate_fn = functools.partial(_default_collate, self.config['task_type'])
+        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=8, pin_memory=True, collate_fn=collate_fn)
+        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=8, pin_memory=True, collate_fn=collate_fn)
 
         return train_dataloader, val_dataloader
 
