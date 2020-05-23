@@ -5,9 +5,7 @@ from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, Rando
 def _default_collate(batch):
     image, target = zip(*batch)
     image = torch.stack(image, 0)
-    if isinstance(target[0], (list, tuple)) and not isinstance(target[0][0], (list, tuple)):  # Multilabel classification
-        raise NotImplementedError()
-
+    # Not implemented: Multiclass classification
     return image, target
 
 
