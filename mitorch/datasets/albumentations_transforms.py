@@ -21,7 +21,7 @@ class AlbumentationsTransform:
             augmented = self.transforms(image=np.array(image), bboxes=bboxes, category_id=category_id)
             image = augmented['image']
             w, h = image.shape[0:2]
-            target = [[label, bbox[0] / w, bbox[1] / h, bbox[2] / w, bbox[3] / h] for label, bbox in zip(augmented['category_id'], augmented['bboxes'])]
+            target = [[label, bbox[0] / w, bbox[1] / h, bbox[2] / w, bbox[3] / h] for label, bbox in zip(augmented['category_id'], augmented['bboxes']) if bbox[0] != bbox[2] and bbox[1] != bbox[3]]
         else:
             image = self.transforms(image=image)['image']
 
