@@ -6,6 +6,9 @@ def _default_collate(batch):
     image, target = zip(*batch)
     image = torch.stack(image, 0)
     # Not implemented: Multiclass classification
+    print(f"len(batch)={len(batch)}")
+    print(f"image.shape={image.shape}")
+    print(f"len(target)={len(target)}")
     return image, target
 
 
