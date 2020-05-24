@@ -1,6 +1,5 @@
 import pickle
 import unittest
-from unittest.mock import MagicMock
 import torch
 from mitorch.builders.lr_scheduler_builder import LinearDecreasingLR
 

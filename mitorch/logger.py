@@ -1,20 +1,12 @@
 import datetime
 import uuid
 import pymongo
-from pytorch_lightning.loggers import LightningLoggerBase, rank_zero_only
+from pytorch_lightning.loggers import LightningLoggerBase
+from pytorch_lightning.utilities import rank_zero_only
 import torch
 
 
 class StdoutLogger(LightningLoggerBase):
-    class ExperimentLogger:
-        def __init__(self, rank):
-            self.rank = rank
-
-        @rank_zero_only
-        def log_epoch_metrics(self, metrics, epoch):
-            metrics = {key: value.tolist() if isinstance(value, torch.Tensor) else value for key, value in metrics.items()}
-            print(f"{datetime.datetime.now()}: Epoch {epoch}: {metrics}")
-
     @rank_zero_only
     def log_metrics(self, metrics, step):
         if metrics:
@@ -26,7 +18,12 @@ class StdoutLogger(LightningLoggerBase):
 
     @property
     def experiment(self):
-        return StdoutLogger.ExperimentLogger(self.rank)
+        return self
+
+    @rank_zero_only
+    def log_epoch_metrics(self, metrics, epoch):
+        metrics = {key: value.tolist() if isinstance(value, torch.Tensor) else value for key, value in metrics.items()}
+        print(f"{datetime.datetime.now()}: Epoch {epoch}: {metrics}")
 
     @property
     def name(self):
@@ -38,17 +35,6 @@ class StdoutLogger(LightningLoggerBase):
 
 
 class MongoDBLogger(LightningLoggerBase):
-    class ExperimentLogger:
-        def __init__(self, rank, log_collection, training_id):
-            self.rank = rank
-            self.log_collection = log_collection
-            self.training_id = training_id
-
-        @rank_zero_only
-        def log_epoch_metrics(self, metrics, epoch):
-            m = {key: value.tolist() if isinstance(value, torch.Tensor) else value for key, value in metrics.items()}
-            self.log_collection.insert_one({'tid': self.training_id, 'e': epoch, 'm': m})
-
     def __init__(self, db_uri, training_id):
         super().__init__()
         self._initialize(db_uri, training_id)
@@ -74,7 +60,12 @@ class MongoDBLogger(LightningLoggerBase):
 
     @property
     def experiment(self):
-        return MongoDBLogger.ExperimentLogger(self.rank, self.log_collection, self.training_id)
+        return self
+
+    @rank_zero_only
+    def log_epoch_metrics(self, metrics, epoch):
+        m = {key: value.tolist() if isinstance(value, torch.Tensor) else value for key, value in metrics.items()}
+        self.log_collection.insert_one({'tid': self.training_id, 'e': epoch, 'm': m})
 
     @property
     def name(self):

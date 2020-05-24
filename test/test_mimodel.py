@@ -21,7 +21,7 @@ class TestMiModel(unittest.TestCase):
 
         model.model = MagicMock()
         model.model.version = 42
-        self.assertEqual(model.version, 42)
+        self.assertEqual(model.model_version, 42)
 
 
 if __name__ == '__main__':

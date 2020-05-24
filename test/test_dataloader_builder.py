@@ -8,7 +8,7 @@ class TestDataloaderBuilder(unittest.TestCase):
         batch = ((torch.zeros(3, 224, 224, dtype=torch.float32), [[0, 0, 0, 224, 224]]),
                  (torch.zeros(3, 224, 224, dtype=torch.float32), [[0, 0, 0, 224, 224]]))
 
-        image, target = _default_collate(batch)
+        image, target = _default_collate('object_detection', batch)
         self.assertEqual(image.shape, (2, 3, 224, 224))
         self.assertIsInstance(target, (list, tuple))
         self.assertEqual(len(target), 2)
