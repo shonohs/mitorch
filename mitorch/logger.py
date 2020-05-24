@@ -34,6 +34,23 @@ class StdoutLogger(LightningLoggerBase):
         return 0
 
 
+class SerializableMongoClient:
+    def __init__(self, url):
+        self._url = url
+        # w=0: Disable write achknowledgement.
+        self._client = pymongo.MongoClient(url, uuidRepresentation='standard', w=0)
+
+    def __getattr__(self, name):
+        return getattr(self._client, name)
+
+    def __getstate__(self):
+        return {'url': self._url}
+
+    def __setstate__(self, state):
+        self._url = state['url']
+        self._client = pymongo.MongoClient(self._url, uuidRepresentation='standard', w=0)
+
+
 class MongoDBLogger(LightningLoggerBase):
     def __init__(self, db_uri, training_id):
         super().__init__()
@@ -43,10 +60,7 @@ class MongoDBLogger(LightningLoggerBase):
         assert isinstance(training_id, uuid.UUID)
         self._db_uri = db_uri
         self.training_id = training_id
-
-        # w=0: Disable write achknowledgement.
-        self.client = pymongo.MongoClient(db_uri, uuidRepresentation='standard', w=0)
-        self.log_collection = self.client.mitorch.training_metrics
+        self.client = SerializableMongoClient(db_uri)
 
     @rank_zero_only
     def log_metrics(self, metrics, step):
@@ -65,7 +79,7 @@ class MongoDBLogger(LightningLoggerBase):
     @rank_zero_only
     def log_epoch_metrics(self, metrics, epoch):
         m = {key: value.tolist() if isinstance(value, torch.Tensor) else value for key, value in metrics.items()}
-        self.log_collection.insert_one({'tid': self.training_id, 'e': epoch, 'm': m})
+        self.client.mitorch.training_metrics.insert_one({'tid': self.training_id, 'e': epoch, 'm': m})
 
     @property
     def name(self):
@@ -74,9 +88,3 @@ class MongoDBLogger(LightningLoggerBase):
     @property
     def version(self):
         return 0
-
-    def __getstate__(self):
-        return {'db_uri': self._db_uri, 'training_id': self.training_id}
-
-    def __setstate__(self, state):
-        self._initialize(state['db_uri'], state['training_id'])
