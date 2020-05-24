@@ -111,6 +111,12 @@ class FileReader:
         else:
             return open(self.base_dir / filepath, mode)
 
+    def __getstate__(self):
+        return {'base_dir': self.base_dir}
+
+    def __setstate__(self, state):
+        self.base_dir = state['base_dir']
+
 
 class MulticlassClassificationDataset(ImageDataset):
     def _get_max_label(self):
