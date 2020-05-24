@@ -44,7 +44,6 @@ class MiModel(pl.LightningModule):
 
     def training_step(self, batch, batch_index):
         image, target = batch
-        print(f"image.shape={image.shape}, len(target)={len(target)}")
         output = self.forward(image)
         loss = self.criterion(output, target)
         return {'loss': loss}
@@ -56,7 +55,6 @@ class MiModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_index):
         image, target = batch
-        print(f"image.shape={image.shape}, len(target)={len(target)}")
         output = self.forward(image)
         loss = self.criterion(output, target)
         predictions = self.predictor(output)
@@ -89,7 +87,6 @@ class MiModel(pl.LightningModule):
         return {'log': results}
 
     def forward(self, x):
-        print(f"{next(self.model.parameters()).device} {x.device}")
         return self.model(x)
 
     def save(self, filepath):
