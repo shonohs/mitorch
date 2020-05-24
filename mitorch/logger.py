@@ -51,10 +51,15 @@ class MongoDBLogger(LightningLoggerBase):
 
     def __init__(self, db_uri, training_id):
         super().__init__()
+        self._initialize(db_uri, training_id)
+
+    def _initialize(self, db_uri, training_id):
         assert isinstance(training_id, uuid.UUID)
+        self._db_uri = db_uri
+        self.training_id = training_id
+
         # w=0: Disable write achknowledgement.
         self.client = pymongo.MongoClient(db_uri, uuidRepresentation='standard', w=0)
-        self.training_id = training_id
         self.log_collection = self.client.mitorch.training_metrics
 
     @rank_zero_only
@@ -78,3 +83,9 @@ class MongoDBLogger(LightningLoggerBase):
     @property
     def version(self):
         return 0
+
+    def __getstate__(self):
+        return {'db_uri': self._db_uri, 'training_id': self.training_id}
+
+    def __setstate__(self, state):
+        self._initialize(state['db_uri'], state['training_id'])
