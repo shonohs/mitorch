@@ -116,6 +116,7 @@ class FileReader:
 
     def __setstate__(self, state):
         self.base_dir = state['base_dir']
+        self.zipfile_cache = {}
 
 
 class MulticlassClassificationDataset(ImageDataset):
