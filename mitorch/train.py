@@ -26,14 +26,13 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
             config = json.load(f)
 
     gpus = -1 if torch.cuda.is_available() else None
-    distributed_backend = 'ddp' if torch.cuda.is_available() else None
-
+    distributed_backend = 'ddp' if torch.cuda_is_available() else 'ddp_cpu'
     model = MiModel(config, train_dataset_filepath, val_dataset_filepath, weights_filepath)
     for l in logger if isinstance(logger, list) else [logger]:
         l.log_hyperparams({'model_versions': model.model_version})
 
     trainer = pl.Trainer(max_epochs=config['max_epochs'], fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend=distributed_backend,
-                         checkpoint_callback=False, logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10)
+                         logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, checkpoint_callback=False)
 
     trainer.fit(model)
     trainer.test(model)
@@ -42,7 +41,7 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
 
 
 def main():
-    parser = argparse.ArgumentParser("Train a model")
+    parser = argparse.ArgumentParser(description="Train a model")
     parser.add_argument('config_filepath', help="Filepath to config.json")
     parser.add_argument('train_dataset_filepath', help="Filepath to training dataset")
     parser.add_argument('val_dataset_filepath', help="Filepath to validation dataset")

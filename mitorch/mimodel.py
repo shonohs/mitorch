@@ -5,8 +5,10 @@ from .evaluators import MulticlassClassificationEvaluator, MultilabelClassificat
 
 
 class MiModel(pl.LightningModule):
-    def __init__(self, config, train_dataset_filepath, val_dataset_filepath, weights_filepath):
+    def __init__(self, config, train_dataset_filepath, val_dataset_filepath, weights_filepath=None):
         super(MiModel, self).__init__()
+        # Save arguments so that checkpoint can load it. Remove after updating the pytorch lightning
+        self.hparams = {'config': config, 'train_dataset_filepath': train_dataset_filepath, 'val_dataset_filepath': val_dataset_filepath, 'weights_filepath': weights_filepath}
         self._train_dataloader, self._val_dataloader = DataLoaderBuilder(config).build(train_dataset_filepath, val_dataset_filepath)
         self.model, self.criterion, self.predictor = ModelBuilder(config).build(self._train_dataloader, weights_filepath)
         self.optimizer = OptimizerBuilder(config).build(self.model)
