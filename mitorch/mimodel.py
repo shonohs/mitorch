@@ -48,7 +48,7 @@ class MiModel(pl.LightningModule):
         image, target = batch
         output = self.forward(image)
         loss = self.criterion(output, target)
-        return {'loss': loss}
+        return {'loss': loss, 'log': {'train_loss': float(loss)}}
 
     def training_epoch_end(self, outputs):
         train_loss = torch.cat([o['loss'] if o['loss'].shape else o['loss'].unsqueeze(0) for o in outputs], dim=0).mean()
