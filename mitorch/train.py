@@ -26,7 +26,7 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
             config = json.load(f)
 
     gpus = -1 if torch.cuda.is_available() else None
-    distributed_backend = 'ddp' if torch.cuda_is_available() else 'ddp_cpu'
+    distributed_backend = 'ddp' if torch.cuda.is_available() else 'ddp_cpu'
     model = MiModel(config, train_dataset_filepath, val_dataset_filepath, weights_filepath)
     for l in logger if isinstance(logger, list) else [logger]:
         l.log_hyperparams({'model_versions': model.model_version})
