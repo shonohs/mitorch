@@ -82,7 +82,7 @@ class DatabaseClient:
     # Common Settings
     def get_settings(self):
         record = self.db.settings.find_one({'key': 'settings'})
-        return record and Settings(**record['value'])
+        return record and Settings.from_dict(record['value'])
 
     def put_settings(self, settings):
         settings = dataclasses.asdict(settings)

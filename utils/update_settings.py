@@ -14,7 +14,7 @@ def update_settings(json_filepath):
 
     if json_filepath:
         settings_data = json.loads(json_filepath.read_text())
-        settings = Settings(**settings_data)
+        settings = Settings.from_dict(settings_data)
         print(f"New settings: {settings}")
         response = input("Continue? [y/N]")
         if response == 'y':

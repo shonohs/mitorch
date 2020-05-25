@@ -4,6 +4,7 @@ import tempfile
 import uuid
 import azureml.core
 from azureml.core.authentication import ServicePrincipalAuthentication
+from ..settings import AzureMLSetting
 
 EXPERIMENT_NAME = 'mitorch'
 
@@ -12,6 +13,7 @@ class AzureMLManager:
     """Manage AzureML runs. Submit a new run and query the status of a run.
     """
     def __init__(self, settings):
+        assert isinstance(settings, list)
         self.managers = [AzureMLSingleResourceManager(s) for s in settings]
 
     def get_num_available_nodes(self):
@@ -33,6 +35,7 @@ class AzureMLManager:
 
 class AzureMLSingleResourceManager:
     def __init__(self, setting):
+        assert isinstance(setting, AzureMLSetting)
         self.setting = setting
         if setting.sp_tenant_id and setting.sp_username and setting.sp_password:
             auth = ServicePrincipalAuthentication(tenant_id=setting.sp_tenant_id,
