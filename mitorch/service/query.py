@@ -5,8 +5,8 @@ from ..environment import Environment
 from .database_client import DatabaseClient
 
 
-def query(db_uri, job_id):
-    client = DatabaseClient(db_uri)
+def query(db_url, job_id):
+    client = DatabaseClient(db_url)
     record = client.find_job_by_id(job_id)
     if record:
         print(record)
@@ -14,8 +14,8 @@ def query(db_uri, job_id):
         print(f"Job {job_id} is not found")
 
 
-def query_all(db_uri):
-    client = DatabaseClient(db_uri)
+def query_all(db_url):
+    client = DatabaseClient(db_url)
     print("===== Active jobs =====")
     _print_jobs(client.get_running_jobs())
 
@@ -38,9 +38,9 @@ def main():
     args = parser.parse_args()
     env = Environment()
     if args.job_id:
-        query(env.db_uri, uuid.UUID(args.job_id))
+        query(env.db_url, uuid.UUID(args.job_id))
     else:
-        query_all(env.db_uri)
+        query_all(env.db_url)
 
 
 if __name__ == '__main__':

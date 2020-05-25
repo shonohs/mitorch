@@ -5,36 +5,56 @@ import uuid
 import azureml.core
 from azureml.core.authentication import ServicePrincipalAuthentication
 
-from ..environment import Environment
-
 EXPERIMENT_NAME = 'mitorch'
 
 
 class AzureMLManager:
     """Manage AzureML runs. Submit a new run and query the status of a run.
-    This
     """
-    def __init__(self, workspace_name, cluster_name, subscription_id, tenant_id=None, username=None, password=None):
-        """Initialize the manager. If tenant_id, username and password are given, use service principal authentication."""
-        if tenant_id and username and password:
-            auth = ServicePrincipalAuthentication(tenant_id=tenant_id, service_principal_id=username, service_principal_password=password)
+    def __init__(self, settings):
+        self.managers = [AzureMLSingleResourceManager(s) for s in settings]
+
+    def get_num_available_nodes(self):
+        return sum(m.get_num_available_nodes() for m in self.managers)
+
+    def submit(self, *args):
+        for manager in self.managers:
+            if manager.get_num_available_nodes() > 0:
+                aml_run_id = manager.submit(*args)
+                return aml_run_id, manager.region
+        return None
+
+    def query(self, run_id, region):
+        for manager in self.managers:
+            if manager.region == region:
+                return manager.query(run_id)
+        return None
+
+
+class AzureMLSingleResourceManager:
+    def __init__(self, setting):
+        self.setting = setting
+        if setting.sp_tenant_id and setting.sp_username and setting.sp_password:
+            auth = ServicePrincipalAuthentication(tenant_id=setting.sp_tenant_id,
+                                                  service_principal_id=setting.sp_username,
+                                                  service_principal_password=setting.sp_password)
         else:
             print("Use interactive authentication...")
             auth = None
 
-        self.workspace = azureml.core.Workspace.get(name=workspace_name, subscription_id=subscription_id, auth=auth)
+        self.workspace = azureml.core.Workspace.get(name=setting.workspace_name, subscription_id=setting.subscription_id, auth=auth)
         if not self.workspace:
-            raise RuntimeError(f"Workspace {workspace_name} not found")
+            raise RuntimeError(f"Workspace {setting.workspace_name} not found")
         self.experiment = azureml.core.Experiment(workspace=self.workspace, name=EXPERIMENT_NAME)
-        self.cluster = azureml.core.compute.ComputeTarget(workspace=self.workspace, name=cluster_name)
+        self.cluster = azureml.core.compute.ComputeTarget(workspace=self.workspace, name=setting.cluster_name)
         if not self.cluster:
-            raise RuntimeError(f"Cluster {cluster_name} doesn't exist in workspace {workspace_name}")
+            raise RuntimeError(f"Cluster {setting.cluster_name} doesn't exist in workspace {setting.workspace_name}")
 
     @property
     def region(self):
-        return os.getenv('MITORCH_AZUREML_REGION')
+        return self.setting.region_name
 
-    def submit(self, db_uri, job_id):
+    def submit(self, db_url, job_id):
         run_config = azureml.core.runconfig.RunConfiguration()
         run_config.target = self.cluster
         dependencies = azureml.core.conda_dependencies.CondaDependencies()
@@ -47,7 +67,7 @@ class AzureMLManager:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             self._generate_bootstrap(temp_dir)
-            args = [str(job_id), '"' + db_uri + '"']
+            args = [str(job_id), '"' + db_url + '"']
             script_run_config = azureml.core.ScriptRunConfig(source_directory=temp_dir, script='boot.py', arguments=args, run_config=run_config)
             run = self.experiment.submit(config=script_run_config)
             run_id = run.get_details()['runId']
@@ -71,7 +91,8 @@ class AzureMLManager:
         s = status.serialize()
         return s['scaleSettings']['maxNodeCount'] - s['currentNodeCount']
 
-    def _generate_bootstrap(self, directory):
+    @staticmethod
+    def _generate_bootstrap(directory):
         filepath = os.path.join(directory, 'boot.py')
         with open(filepath, 'w') as f:
             f.write('import os\n')
@@ -79,24 +100,3 @@ class AzureMLManager:
             f.write('os.system("pip install https://github.com/shonohs/mitorch_models/archive/dev.zip")\n')
             f.write('os.system("pip install https://github.com/shonohs/mitorch/archive/dev.zip")\n')
             f.write('os.system("miamlrun " + " ".join(sys.argv[1:]))')
-
-
-def main():
-    parser = argparse.ArgumentParser("Manage MiTorch jobs on AzureML")
-    parser.add_argument('command', choices=['submit', 'query'])
-    parser.add_argument('--job_id', required=True, help="Training ID to submit. Or AzureML Run ID to query.")
-
-    args = parser.parse_args()
-    env = Environment()
-    manager = AzureMLManager(env.azureml_workspace_name, env.azureml_cluster_name, env.azureml_subscription_id,
-                             env.azureml_tenant_id, env.azureml_username, env.azureml_password)
-
-    if args.command == 'submit':
-        manager.submit(env.db_uri, uuid.UUID(args.job_id))
-    elif args.command == 'query':
-        result = manager.query(args.job_id)
-        print(result)
-
-
-if __name__ == '__main__':
-    main()

@@ -52,15 +52,12 @@ class SerializableMongoClient:
 
 
 class MongoDBLogger(LightningLoggerBase):
-    def __init__(self, db_uri, training_id):
+    def __init__(self, db_url, training_id):
         super().__init__()
-        self._initialize(db_uri, training_id)
-
-    def _initialize(self, db_uri, training_id):
         assert isinstance(training_id, uuid.UUID)
-        self._db_uri = db_uri
+        self._db_url = db_url
         self.training_id = training_id
-        self.client = SerializableMongoClient(db_uri)
+        self.client = SerializableMongoClient(db_url)
 
     @rank_zero_only
     def log_metrics(self, metrics, step):

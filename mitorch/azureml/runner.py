@@ -31,11 +31,9 @@ class AzureMLRunner:
         self.db_url = db_url
         self.job_id = job_id
         self.client = DatabaseClient(self.db_url)
-        self.blob_storage_url = self.client.get_storage_uri()
 
     def run(self):
         """First method to be run on AzureML instance"""
-
         # Get the job description from the database.
         job = self.client.find_training_by_id(self.job_id)
         if not job:
@@ -46,7 +44,9 @@ class AzureMLRunner:
         region = job['region']
         print(config)
 
-        self.dataset_base_uri = self.client.get_dataset_uri(region)
+        settings = self.client.get_settings()
+        self.dataset_base_url = settings.dataset_url[region]
+        self.blob_storage_url = settings.storage_url
 
         # Record machine setup.
         num_gpus = torch.cuda.device_count()
@@ -67,12 +67,12 @@ class AzureMLRunner:
 
     def download_dataset(self, dataset_name, directory):
         dataset = self.client.find_dataset_by_name(dataset_name)
-        train_filepath = self._download_blob_file(self.dataset_base_uri, dataset['train']['path'], directory)
-        val_filepath = self._download_blob_file(self.dataset_base_uri, dataset['val']['path'], directory)
+        train_filepath = self._download_blob_file(self.dataset_base_url, dataset['train']['path'], directory)
+        val_filepath = self._download_blob_file(self.dataset_base_url, dataset['val']['path'], directory)
 
         files = set(dataset['train']['support_files'] + dataset['val']['support_files'])
         for uri in files:
-            self._download_blob_file(self.dataset_base_uri, uri, directory)
+            self._download_blob_file(self.dataset_base_url, uri, directory)
 
         return train_filepath, val_filepath
 

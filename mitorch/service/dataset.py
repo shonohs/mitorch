@@ -4,11 +4,11 @@ from ..environment import Environment
 from .database_client import DatabaseClient
 
 
-def add_dataset(db_uri, json_filepath):
+def add_dataset(db_url, json_filepath):
     with open(json_filepath) as f:
         datasets = json.load(f)
 
-    client = DatabaseClient(db_uri)
+    client = DatabaseClient(db_url)
     for dataset in datasets:
         if not client.find_dataset_by_name(dataset['name'], dataset['version']):
             print(f"Adding dataset: {dataset}")
@@ -24,7 +24,7 @@ def main():
     args = parser.parse_args()
     env = Environment()
     if args.command == 'add':
-        add_dataset(env.db_uri, args.json_filepath)
+        add_dataset(env.db_url, args.json_filepath)
 
 
 if __name__ == '__main__':

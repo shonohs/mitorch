@@ -1,11 +1,12 @@
+import dataclasses
 import datetime
 import uuid
 import pymongo
+from ..settings import Settings
 
 
 class DatabaseClient:
     def __init__(self, mongodb_url):
-        print(f"Connecting to the database: {mongodb_url}")
         client = pymongo.MongoClient(mongodb_url, uuidRepresentation='standard')
         self.db = client.mitorch
 
@@ -79,15 +80,14 @@ class DatabaseClient:
         return self.db.datasets.insert_one(dataset)
 
     # Common Settings
-    def get_storage_uri(self):
-        """Weights blob url with a sas token for read/write access."""
-        return self._get_settings('storage_uri')
+    def get_settings(self):
+        record = self.db.settings.find_one({'key': 'settings'})
+        return record and Settings(**record['value'])
 
-    def get_dataset_uri(self, region='wus2'):
-        """Dataset blob url with a sas token for readonly access."""
-        dataset_settings = self._get_settings('dataset_url')
-        return dataset_settings.get(region)
-
-    def _get_settings(self, key):
-        record = self.db.settings.find_one({'key': key})
-        return record['value']
+    def put_settings(self, settings):
+        settings = dataclasses.asdict(settings)
+        if self.get_settings():
+            result = self.db.settings.update_one({'key': 'settings'}, {'$set': {'value': settings}})
+            assert result.modified_count == 1
+        else:
+            self.db.settings.insert_one({'key': 'settings', 'value': settings})
