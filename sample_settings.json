@@ -1,5 +1,6 @@
 {
     "storage_url": "https://...",
+    "readonly_storage_url": "https://...",
     "dataset_url": {
         "wus2": "https://..."
     },

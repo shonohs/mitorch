@@ -1,7 +1,5 @@
-import argparse
 import os
 import tempfile
-import uuid
 import azureml.core
 from azureml.core.authentication import ServicePrincipalAuthentication
 from ..settings import AzureMLSetting

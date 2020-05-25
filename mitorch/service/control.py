@@ -42,7 +42,7 @@ def process_trainings(client, aml_manager, db_url):
         for job in pending_jobs:
             submit_result = aml_manager.submit(db_url, job['_id'])
             if submit_result:
-                aml_run_id, region = submit_rsult
+                aml_run_id, region = submit_result
                 updated = client.update_training(job['_id'], {'status': 'queued', 'run_id': aml_run_id, 'region': aml_manager.region})
                 if not updated:
                     raise RuntimeError(f"Failed to update {job['_id']}")

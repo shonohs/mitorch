@@ -24,7 +24,9 @@ class Settings:
     # AzureML settings
     azureml_settings: List[AzureMLSetting]
 
+    readonly_storage_url: str = None
+
     @classmethod
     def from_dict(cls, data):
         azureml_settings = [AzureMLSetting(**s) for s in data['azureml_settings']]
-        return cls(storage_url=data['storage_url'], dataset_url=data['dataset_url'], azureml_settings=azureml_settings)
+        return cls(storage_url=data['storage_url'], dataset_url=data['dataset_url'], azureml_settings=azureml_settings, readonly_storage_url=data.get('readonly_storage_url'))
