@@ -17,7 +17,8 @@ class TestMiModel(unittest.TestCase):
             with patch('mitorch.mimodel.ModelBuilder', return_value=mock_model_builder):
                 with patch('mitorch.mimodel.OptimizerBuilder', return_value=mock_optimizer_builder):
                     with patch('mitorch.mimodel.LrSchedulerBuilder', return_value=mock_lrscheduler_builder):
-                        model = MiModel(MagicMock(), None, None, None)
+                        model = MiModel({'config': MagicMock(), 'train_dataset_filepath': None,
+                                         'val_dataset_filepath': None, 'weights_filepath': None})
 
         model.model = MagicMock()
         model.model.version = 42

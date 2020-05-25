@@ -27,7 +27,8 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
 
     gpus = -1 if torch.cuda.is_available() else None
     distributed_backend = 'ddp' if torch.cuda.is_available() else 'ddp_cpu'
-    model = MiModel(config, train_dataset_filepath, val_dataset_filepath, weights_filepath)
+    hparams = {'config': config, 'train_dataset_filepath': train_dataset_filepath, 'val_dataset_filepath': val_dataset_filepath, 'weights_filepath': weights_filepath}
+    model = MiModel(hparams)
     for l in logger if isinstance(logger, list) else [logger]:
         l.log_hyperparams({'model_versions': model.model_version})
 
@@ -35,7 +36,7 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
                          logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, checkpoint_callback=False, deterministic=True)
 
     trainer.fit(model)
-    trainer.test(model)
+    trainer.test()
     if output_filepath:
         model.save(output_filepath)
 
