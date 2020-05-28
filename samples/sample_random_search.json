@@ -1,0 +1,45 @@
+{
+    "name": "random_search",
+    "status": "active",
+    "num_trainings": 0,
+    "max_trainings": 5,
+    "config": {
+        "model": {
+            "name": "MobileNetV3SmallRelu6"
+        },
+        "optimizer": {
+            "name": "sgd",
+            "momentum": 0.9,
+            "weight_decay": {
+                "_choice": [
+                    0.0001,
+                    1e-05
+                ]
+            }
+        },
+        "lr_scheduler": {
+            "name": "cosine_annealing",
+            "base_lr": {
+                "_choice": [
+                    0.1,
+                    0.05,
+                    0.01
+                ]
+            }
+        },
+        "augmentation": {
+            "train": "random_resize",
+            "val": "resize"
+        },
+        "batch_size": 64,
+        "input_size": 224,
+        "max_epochs": {
+            "_choice": [
+                50,
+                100
+            ]
+        },
+        "dataset": "Cifar10",
+        "task_type": "multiclass_classification"
+    }
+}

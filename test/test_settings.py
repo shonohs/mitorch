@@ -6,6 +6,7 @@ from mitorch.settings import Settings
 class TestSettings(unittest.TestCase):
     def test_from_dict(self):
         obj = {'storage_url': 'storage_url',
+               'readonly_storage_url': None,
                'dataset_url': {'region': 'dataset_url'},
                'azureml_settings': [{'subscription_id': 'subscription_id',
                                      'workspace_name': 'workspace_name',

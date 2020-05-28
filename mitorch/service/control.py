@@ -5,6 +5,7 @@ import time
 from ..azureml import AzureMLManager
 from ..environment import Environment
 from .database_client import DatabaseClient
+from .task import Task
 
 
 def control_loop(env):
@@ -28,8 +29,7 @@ def control(env):
     process_trainings(client, aml_manager, env.db_url)
 
     # Check the status of jobs. Queue new trainings if needed.
-    # TODO: Implement process_jobs
-    # process_jobs(client)
+    process_tasks(client)
 
     print(f"{datetime.datetime.now()}: Completed")
 
@@ -59,14 +59,23 @@ def process_trainings(client, aml_manager, db_url):
                 raise RuntimeError(f"Failed to update {job['_id']}")
 
 
-def process_jobs(client):
+def process_tasks(client):
     # Get all active jobs
-
-    # For each job
-    # Check the last experiment status
-    # If it's done, check the job status. If still active, queue a next training.
-    # Update the record
-    raise NotImplementedError
+    tasks = client.get_active_tasks()
+    for task_data in tasks:
+        print(f"Processing task: {task_data}")
+        task = Task.from_dict(task_data)
+        candidate = task.fetch_next()
+        assert candidate
+        training = client.find_training_by_config(candidate)
+        if not training:
+            client.add_training(candidate)
+            print(f"Submitted new training: {candidate}")
+        else:
+            task.update_training_status(training)
+            new_task_data = task.to_dict()
+            if new_task_data != task_data:
+                client.update_task(new_task_data)
 
 
 def main():

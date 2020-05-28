@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 import datetime
 import uuid
@@ -10,17 +11,7 @@ class DatabaseClient:
         client = pymongo.MongoClient(mongodb_url, uuidRepresentation='standard')
         self.db = client.mitorch
 
-    def add_job(self, config, priority):
-        record = {'config': config}
-        record['_id'] = uuid.uuid4()
-        record['created_at'] = datetime.datetime.utcnow()
-        record['priority'] = priority
-        record['status'] = 'new'
-        self.db.jobs.insert_one(record)
-
-        return record['_id']
-
-    def add_training(self, config, priority):
+    def add_training(self, config, priority=100):
         record = {'config': config}
         record['_id'] = uuid.uuid4()
         record['created_at'] = datetime.datetime.utcnow()
@@ -36,11 +27,11 @@ class DatabaseClient:
             record = self.db.jobs.find_one({'_id': job_id})
         return record
 
-    def get_running_jobs(self):
-        return self.db.jobs.find({'status': 'running'})
-
     def find_training_by_id(self, training_id):
         return self.db.trainings.find_one({'_id': training_id})
+
+    def find_training_by_config(self, config):
+        return self.db.trainings.find_one({'config': config})
 
     def get_new_trainings(self, max_num=100):
         return self.db.trainings.find({'status': 'new'}).sort('priority').limit(max_num)
@@ -72,6 +63,7 @@ class DatabaseClient:
                                                                               'evaluation': metrics}})
         return result.modified_count == 1
 
+    # Datasets
     def find_dataset_by_name(self, dataset_name, version=None):
         # TODO: Get the latest version
         return self.db.datasets.find_one({'name': dataset_name})
@@ -91,3 +83,24 @@ class DatabaseClient:
             assert result.modified_count == 1
         else:
             self.db.settings.insert_one({'key': 'settings', 'value': settings})
+
+    # Tasks
+    def add_task(self, task):
+        assert 'config' in task
+        assert 'max_trainings' in task
+        record = copy.deepcopy(task)
+        record['_id'] = uuid.uuid4()
+        record['created_at'] = datetime.datetime.utcnow()
+        record['status'] = 'active'
+        self.db.tasks.insert_one(record)
+        return record['_id']
+
+    def get_tasks(self):
+        return self.db.tasks.find()
+
+    def get_active_tasks(self):
+        return self.db.tasks.find({'status': 'active'})
+
+    def update_task(self, task_description):
+        assert task_description['_id']
+        self.db.tasks.update_one({'_id': task_description['_id']}, {'$set': task_description})
