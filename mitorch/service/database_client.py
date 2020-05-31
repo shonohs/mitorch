@@ -42,6 +42,13 @@ class DatabaseClient:
     def get_queued_trainings(self):
         return self.db.trainings.find({'status': 'queued'})
 
+    def get_failed_trainings(self):
+        return self.db.trainings.find({'status': 'failed'})
+
+    def delete_training(self, training_id):
+        result = self.db.trainings.delete_one({'_id': training_id})
+        return result.deleted_count == 1
+
     def update_training(self, training_id, set_data):
         assert isinstance(set_data, dict)
         result = self.db.trainings.update_one({'_id': training_id}, {'$set': set_data})
@@ -98,9 +105,16 @@ class DatabaseClient:
     def get_tasks(self):
         return self.db.tasks.find()
 
+    def get_task_by_id(self, task_id):
+        return self.db.tasks.find_one({'_id': task_id})
+
     def get_active_tasks(self):
         return self.db.tasks.find({'status': 'active'})
 
     def update_task(self, task_description):
         assert task_description['_id']
         self.db.tasks.update_one({'_id': task_description['_id']}, {'$set': task_description})
+
+    def delete_task(self, task_id):
+        result = self.db.tasks.delete_one({'_id': task_id})
+        return result.deleted_count == 1

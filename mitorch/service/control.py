@@ -63,7 +63,6 @@ def process_tasks(client):
     # Get all active jobs
     tasks = client.get_active_tasks()
     for task_data in tasks:
-        print(f"Processing task: {task_data}")
         task = Task.from_dict(task_data)
         candidate = task.fetch_next()
         assert candidate
