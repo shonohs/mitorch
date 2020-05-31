@@ -1,6 +1,6 @@
 import functools
 import torch
-from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform
+from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomResizedBBoxSafeCropTransform
 
 
 def _default_collate(task_type, batch):
@@ -9,7 +9,7 @@ def _default_collate(task_type, batch):
     if task_type == 'multiclass_classification':
         target = torch.tensor(target)
     elif task_type == 'multilabel_classification':
-        raise NotImplementedError
+        raise NotImplementedError  # TODO: Support multilabel datasets
     return image, target
 
 
@@ -37,7 +37,8 @@ class DataLoaderBuilder:
     def build_augmentation(name, input_size, is_object_detection):
         augmentation_class = {'resize': ResizeTransform,
                               'resize_flip': ResizeFlipTransform,
-                              'random_resize': RandomResizedCropTransform}.get(name)
+                              'random_resize': RandomResizedCropTransform,
+                              'random_resize_bbox': RandomResizedBBoxSafeCropTransform}.get(name)
 
         if not augmentation_class:
             raise NotImplementedError(f"Non supported augmentation: {name}")
