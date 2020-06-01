@@ -1,6 +1,6 @@
 import functools
 import torch
-from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomResizedBBoxSafeCropTransform
+from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomSizedBBoxSafeCropTransform
 
 
 def _default_collate(task_type, batch):
@@ -38,7 +38,7 @@ class DataLoaderBuilder:
         augmentation_class = {'resize': ResizeTransform,
                               'resize_flip': ResizeFlipTransform,
                               'random_resize': RandomResizedCropTransform,
-                              'random_resize_bbox': RandomResizedBBoxSafeCropTransform}.get(name)
+                              'random_resize_bbox': RandomSizedBBoxSafeCropTransform}.get(name)
 
         if not augmentation_class:
             raise NotImplementedError(f"Non supported augmentation: {name}")
