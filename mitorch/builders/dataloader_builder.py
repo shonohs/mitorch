@@ -1,6 +1,6 @@
 import functools
 import torch
-from ..datasets import ImageDataset, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomSizedBBoxSafeCropTransform
+from ..datasets import ImageDataset, CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomSizedBBoxSafeCropTransform
 
 
 def _default_collate(task_type, batch):
@@ -35,7 +35,8 @@ class DataLoaderBuilder:
 
     @staticmethod
     def build_augmentation(name, input_size, is_object_detection):
-        augmentation_class = {'resize': ResizeTransform,
+        augmentation_class = {'center_crop': CenterCropTransform,
+                              'resize': ResizeTransform,
                               'resize_flip': ResizeFlipTransform,
                               'random_resize': RandomResizedCropTransform,
                               'random_resize_bbox': RandomSizedBBoxSafeCropTransform}.get(name)
