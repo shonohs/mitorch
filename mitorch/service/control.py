@@ -18,7 +18,7 @@ def control_loop(env):
             print(f"Exception happened: {e}")
             # Ignore the exception
 
-        time.sleep(300)  # Sleep for 5 minutes
+        time.sleep(600)  # Sleep for 10 minutes
 
 
 def control(env):

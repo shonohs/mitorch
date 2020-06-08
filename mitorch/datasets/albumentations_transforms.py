@@ -63,5 +63,6 @@ class RandomSizedBBoxSafeCropTransform(AlbumentationsTransform):
 
 class CenterCropTransform(AlbumentationsTransform):
     def __init__(self, input_size, is_object_detection):
-        transforms = [albumentations.augmentations.transforms.CenterCrop(input_size, input_size)]
+        transforms = [albumentations.augmentations.transforms.SmallestMaxSize(input_size),
+                      albumentations.augmentations.transforms.CenterCrop(input_size, input_size)]
         super().__init__(transforms, is_object_detection)
