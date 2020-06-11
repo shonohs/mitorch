@@ -115,6 +115,10 @@ class DatabaseClient:
         assert task_description['_id']
         self.db.tasks.update_one({'_id': task_description['_id']}, {'$set': task_description})
 
+    def cancel_task(self, task_id):
+        result = self.db.tasks.update_one({'_id': task_id}, {'$set': {'status': 'cancelled'}})
+        return result.modified_count == 1
+
     def delete_task(self, task_id):
         result = self.db.tasks.delete_one({'_id': task_id})
         return result.deleted_count == 1
