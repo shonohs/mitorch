@@ -2,25 +2,28 @@
     "name": "random_search",
     "status": "active",
     "num_trainings": 0,
-    "max_trainings": 5,
+    "max_trainings": 20,
     "config": {
         "model": {
             "name": "MobileNetV3SmallRelu6"
         },
         "optimizer": {
-            "name": "sgd",
+            "name": {"_choice": ["sgd", "adam"]},
             "momentum": 0.9,
             "weight_decay": {
                 "_choice": [
+		    0.0005,
                     0.0001,
-                    1e-05
+		    0.00005,
+		    0.00001
                 ]
             }
         },
         "lr_scheduler": {
-            "name": "cosine_annealing",
+            "name": {"_choice": ["cosine_annealing", "linear_decreasing"]},
             "base_lr": {
                 "_choice": [
+		    0.5,
                     0.1,
                     0.05,
                     0.01
@@ -29,14 +32,15 @@
         },
         "augmentation": {
             "train": "random_resize",
-            "val": "resize"
+            "val": "center_crop"
         },
         "batch_size": 64,
         "input_size": 224,
         "max_epochs": {
             "_choice": [
                 50,
-                100
+                100,
+		200
             ]
         },
         "dataset": "Cifar10",
