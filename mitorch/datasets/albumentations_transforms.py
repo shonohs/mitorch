@@ -47,6 +47,14 @@ class RandomResizedCropTransform(AlbumentationsTransform):
         super().__init__(transforms, is_object_detection)
 
 
+class RandomResizedCropTransformV3(AlbumentationsTransform):
+    def __init__(self, input_size, is_object_detection):
+        transforms = [albumentations.augmentations.transforms.RandomResizedCrop(input_size, input_size),
+                      albumentations.augmentations.transforms.HorizontalFlip(),
+                      albumentations.augmentations.transforms.RandomBrightnessContrast()]
+        super().__init__(transforms, is_object_detection)
+
+
 class ResizeTransform(AlbumentationsTransform):
     def __init__(self, input_size, is_object_detection):
         transforms = [albumentations.augmentations.transforms.Resize(input_size, input_size)]
