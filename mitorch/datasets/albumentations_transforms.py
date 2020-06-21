@@ -32,6 +32,13 @@ class AlbumentationsTransform:
         return image, target
 
 
+class RandomResizedCropTransformV2(AlbumentationsTransform):
+    def __init__(self, input_size, is_object_detection):
+        transforms = [albumentations.augmentations.transforms.RandomResizedCrop(input_size, input_size),
+                      albumentations.augmentations.transforms.HorizontalFlip()]
+        super().__init__(transforms, is_object_detection)
+
+
 class RandomResizedCropTransform(AlbumentationsTransform):
     def __init__(self, input_size, is_object_detection):
         transforms = [albumentations.augmentations.transforms.RandomResizedCrop(input_size, input_size),
