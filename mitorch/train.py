@@ -26,14 +26,14 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
             config = json.load(f)
 
     gpus = -1 if torch.cuda.is_available() else None
-    distributed_backend = 'ddp' if torch.cuda.is_available() else 'ddp_cpu'
+    distributed_backend = 'ddp' if torch.cuda.is_available() else 'ddp'
     hparams = {'config': config, 'train_dataset_filepath': train_dataset_filepath, 'val_dataset_filepath': val_dataset_filepath, 'weights_filepath': weights_filepath}
     model = MiModel(hparams)
     for l in logger if isinstance(logger, list) else [logger]:
         l.log_hyperparams({'model_versions': model.model_version})
 
     trainer = pl.Trainer(max_epochs=config['max_epochs'], fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend=distributed_backend,
-                         logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, checkpoint_callback=False, deterministic=True)
+                         logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=True)
 
     trainer.fit(model)
     trainer.test()
