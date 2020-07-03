@@ -35,9 +35,14 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
                          logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=True)
 
     trainer.fit(model)
-    trainer.test()
     if output_filepath:
         model.save(output_filepath)
+
+    # As of pytorch-lightning 0.8.4, the test() will fail due to a bug.
+    trainer = pl.Trainer(max_epochs=config['max_epochs'], fast_dev_run=fast_dev_run, gpus=1, distributed_backend='ddp',
+                         logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=True)
+
+    trainer.test()
 
 
 def main():
