@@ -12,7 +12,7 @@ class OptimizerBuilder:
 
         assert isinstance(self.base_lr, float) and self.base_lr > 0
         assert isinstance(momentum, float) and momentum > 0
-        assert isinstance(weight_decay, float) and weight_decay >= 0
+        assert isinstance(weight_decay, (int, float)) and weight_decay >= 0  # It can be int when weight_decay == 0.
 
         if self.config['name'] == 'adam':
             return torch.optim.Adam(model.parameters(), lr=self.base_lr, weight_decay=weight_decay)
