@@ -72,8 +72,8 @@ class MiModel(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         results = self.evaluator.get_report()
         self.evaluator.reset()
-        results = {key: torch.tensor(value) for key, value in results.items()}
-        results['val_loss'] = torch.cat([o['val_loss'] if o['val_loss'].shape else o['val_loss'].unsqueeze(0) for o in outputs], dim=0).mean()
+        results = {key: torch.tensor(value).to(self.device) for key, value in results.items()}
+        results['val_loss'] = torch.cat([o['val_loss'] if o['val_loss'].shape else o['val_loss'].unsqueeze(0) for o in outputs], dim=0).to(self.device).mean()
         self._log_epoch_metrics(results, self.current_epoch)
         return {'log': results}
 
@@ -88,8 +88,8 @@ class MiModel(pl.LightningModule):
     def test_epoch_end(self, outputs):
         results = self.evaluator.get_report()
         self.evaluator.reset()
-        results = {key: torch.tensor(value) for key, value in results.items()}
-        results['test_loss'] = torch.cat([o['test_loss'] if o['test_loss'].shape else o['test_loss'].unsqueeze(0) for o in outputs], dim=0).mean()
+        results = {key: torch.tensor(value).to(self.device) for key, value in results.items()}
+        results['test_loss'] = torch.cat([o['test_loss'] if o['test_loss'].shape else o['test_loss'].unsqueeze(0) for o in outputs], dim=0).to(self.device).mean()
         self._log_epoch_metrics(results, self.current_epoch)
         return {'log': results}
 

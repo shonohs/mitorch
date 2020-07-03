@@ -1,6 +1,7 @@
 import functools
 import torch
-from ..datasets import ImageDataset, CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomResizedCropTransformV2, RandomResizedCropTransformV3, RandomSizedBBoxSafeCropTransform, InceptionTransform
+from ..datasets import (ImageDataset, CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomResizedCropTransformV2, RandomResizedCropTransformV3,
+                        RandomSizedBBoxSafeCropTransform, InceptionTransform)
 
 
 def _default_collate(task_type, batch):
