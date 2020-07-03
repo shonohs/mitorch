@@ -1,3 +1,4 @@
+import logging
 import torch.optim
 
 
@@ -7,6 +8,7 @@ class OptimizerBuilder:
         self.base_lr = config['lr_scheduler']['base_lr']
 
     def build(self, model):
+        logging.info(f"Building a optimizer. base_lr: {self.base_lr}, config: {self.config}")
         momentum = self.config['momentum']
         weight_decay = self.config['weight_decay']
 

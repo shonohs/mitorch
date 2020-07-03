@@ -1,3 +1,4 @@
+import logging
 import torch.optim
 
 
@@ -15,6 +16,7 @@ class LrSchedulerBuilder:
         self.config = config['lr_scheduler']
 
     def build(self, optimizer, total_iters):
+        logging.info(f"Building a lr_scheduler. total_iters: {total_iters}, config: {self.config}")
         if self.config['name'] == 'cosine_annealing':
             return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, total_iters)
         elif self.config['name'] == 'linear_decreasing':

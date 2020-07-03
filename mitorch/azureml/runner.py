@@ -12,18 +12,21 @@ The job of this script is:
 - Upload the trained model to Azure Storage
 """
 import argparse
+import json
+import logging
 import os
+import pathlib
 import shutil
+import subprocess
 import tempfile
 import time
 import urllib
 import uuid
 import requests
 import torch
-from mitorch.logger import MongoDBLogger, StdoutLogger
 from mitorch.service import DatabaseClient
-from mitorch.train import train
 
+_logger = logging.getLogger(__name__)
 
 class AzureMLRunner:
     def __init__(self, db_url, job_id):
@@ -53,17 +56,38 @@ class AzureMLRunner:
         self.client.start_training(self.job_id, num_gpus)
 
         with tempfile.TemporaryDirectory() as work_dir:
-            os.mkdir(os.path.join(work_dir, 'outputs'))
-            output_filepath = os.path.join(work_dir, 'outputs', 'model.pth')
+            work_dir = pathlib.Path(work_dir)
+            os.mkdir(work_dir / 'outputs')
+            output_filepath = work_dir / 'outputs' / 'model.pth'
+            config_filepath = work_dir / 'config.json'
+            config_filepath.write_text(json.dumps(config))
             train_filepath, val_filepath = self.download_dataset(dataset_name, work_dir)
             weights_filepath = self.download_weights(uuid.UUID(config['base']), work_dir) if 'base' in config else None
-            logger = [MongoDBLogger(self.db_url, self.job_id), StdoutLogger()]
-            print("Starting the training.")
-            train(config, train_filepath, val_filepath, weights_filepath, output_filepath, False, logger)
-            print("Training completed.")
+
+            command = ['mitrain', str(config_filepath), str(train_filepath), str(val_filepath), '--weights_filepath', str(weights_filepath),
+                       '--output_filepath', str(output_filepath), '--job_id', str(self.job_id), '--db_url', self.db_url]
+            _logger.info(f"Starting the training. command: {command}")
+            proc = subprocess.run(command)
+            _logger.info(f"Training completed. returncode: {proc.returncode}")
+
+            if proc.returncode != 0 or not output_filepath.exists():
+                self.client.fail_training(self.job_id)
+                return
 
             self.upload_files([output_filepath])
-            self.client.complete_training(self.job_id)
+
+            command = ['mitest', str(config_filepath), str(train_filepath), str(val_filepath), '--weights_filepath', str(output_filepath),
+                       '--job_id', str(self.job_id), '--db_url', self.db_url]
+            _logger.info(f"Starting test. command: {command}")
+            proc = subprocess.run(command)
+            _logger.info(f"Test completed. returncode: {proc.returncode}")
+
+            if proc.returncode == 0:
+                self.client.complete_training(self.job_id)
+            else:
+                self.client.fail_training(self.job_id)
+
+        _logger.info("All completed.")
 
     def download_dataset(self, dataset_name, directory):
         dataset = self.client.find_dataset_by_name(dataset_name)
@@ -82,7 +106,7 @@ class AzureMLRunner:
 
     def upload_files(self, files):
         for filepath in files:
-            blob_path = os.path.join(self.job_id.hex, os.path.basename(filepath))
+            blob_path = os.path.join(self.job_id.hex, filepath.name)
             self._upload_blob_file(self.blob_storage_url, filepath, blob_path)
 
     @staticmethod
@@ -90,10 +114,8 @@ class AzureMLRunner:
         parts = urllib.parse.urlparse(base_blob_uri)
         path = os.path.join(parts[2], blob_path)
         url = urllib.parse.urlunparse((parts[0], parts[1], path, parts[3], parts[4], parts[5]))
-        print(f"Uploading {local_filepath} to {url}")
-        with open(local_filepath, 'rb') as f:
-            data = f.read()
-        requests.put(url=url, data=data, headers={'Content-Type': 'application/octet-stream', 'x-ms-blob-type': 'BlockBlob'})
+        _logger.info(f"Uploading {local_filepath} to {url}")
+        requests.put(url=url, data=local_filepath.read_bytes(), headers={'Content-Type': 'application/octet-stream', 'x-ms-blob-type': 'BlockBlob'})
 
     @staticmethod
     def _download_blob_file(base_blob_uri, blob_path, directory):
@@ -105,17 +127,20 @@ class AzureMLRunner:
     @staticmethod
     def _download_file(url, directory):
         filename = os.path.basename(urllib.parse.urlparse(url).path)
-        filepath = os.path.join(directory, filename)
-        print(f"Downloading {url} to {filepath}")
+        filepath = directory / filename
+        _logger.info(f"Downloading {url} to {filepath}")
         start = time.time()
         with requests.get(url, stream=True, allow_redirects=True) as r:
             with open(filepath, 'wb') as f:
                 shutil.copyfileobj(r.raw, f, length=4194304)  # 4MB
-        print(f"Downloaded. {time.time() - start}s.")
+        _logger.debug(f"Downloaded. {time.time() - start}s.")
         return filepath
 
 
 def main():
+    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger('mitorch').setLevel(logging.DEBUG)
+
     parser = argparse.ArgumentParser("Run training on AzureML")
     parser.add_argument('job_id', help="Guid for the target run")
     parser.add_argument('db_url', help="MongoDB URI for training management")

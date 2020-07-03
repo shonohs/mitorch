@@ -70,6 +70,11 @@ class DatabaseClient:
                                                                               'evaluation': metrics}})
         return result.modified_count == 1
 
+    def fail_training(self, training_id):
+        result = self.db.trainings.update_one({'_id': training_id}, {'$set': {'status': 'failed',
+                                                                              'completed_at': datetime.datetime.utcnow()}})
+        return result.modified_count == 1
+
     # Datasets
     def find_dataset_by_name(self, dataset_name, version=None):
         # TODO: Get the latest version

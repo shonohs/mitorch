@@ -1,3 +1,4 @@
+import logging
 import torch
 from mitorch.models import ModelFactory
 
@@ -7,6 +8,7 @@ class ModelBuilder:
         self.config = config['model']
 
     def build(self, dataloader, weights_filepath=None):
+        logging.info(f"Building a model. weights: {weights_filepath}, config: {self.config}")
         num_classes = len(dataloader.dataset.labels)
         dataset_type = dataloader.dataset.dataset_type
 
@@ -42,7 +44,7 @@ class ModelBuilder:
         weights = torch.load(weights_filepath, map_location=torch.device('cpu'))
         src_depth = _get_depth(weights.keys())
         dst_depth = _get_depth(model.state_dict().keys())
-        print(f"Source depth: {src_depth}, Destination depth: {dst_depth}")
+        logging.debug(f"Source depth: {src_depth}, Destination depth: {dst_depth}")
 
         if dst_depth > src_depth:
             for i in range(dst_depth - src_depth):
@@ -53,4 +55,4 @@ class ModelBuilder:
         try:
             model.load_state_dict(weights, strict=False)
         except RuntimeError as e:
-            print(f"Ignored load erros: {e}")
+            logging.warning(f"Ignored load erros: {e}")

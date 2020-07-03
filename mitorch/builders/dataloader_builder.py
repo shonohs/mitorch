@@ -1,4 +1,5 @@
 import functools
+import logging
 import torch
 from ..datasets import (ImageDataset, CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomResizedCropTransformV2, RandomResizedCropTransformV3,
                         RandomSizedBBoxSafeCropTransform, InceptionTransform)
@@ -17,20 +18,24 @@ def _default_collate(task_type, batch):
 class DataLoaderBuilder:
     def __init__(self, config):
         self.augmentation_config = config['augmentation']
-        self.config = config
+        self.task_type = config['task_type']
+        self.input_size = config['input_size']
+        self.batch_size = config['batch_size']
 
     def build(self, train_dataset_filepath, val_dataset_filepath):
-        is_object_detection = self.config['task_type'] == 'object_detection'
-        train_augmentation = self.build_augmentation(self.augmentation_config['train'], self.config['input_size'], is_object_detection)
+        logging.info(f"Building a data_loader. train: {train_dataset_filepath}, val: {val_dataset_filepath}, augmentation: {self.augmentation_config}, "
+                     f"task: {self.task_type}, input_size: {self.input_size}, batch_size: {self.batch_size}")
+
+        is_object_detection = self.task_type == 'object_detection'
+        train_augmentation = self.build_augmentation(self.augmentation_config['train'], self.input_size, is_object_detection)
         train_dataset = ImageDataset.from_file(train_dataset_filepath, train_augmentation)
 
-        val_augmentation = self.build_augmentation(self.augmentation_config['val'], self.config['input_size'], is_object_detection)
+        val_augmentation = self.build_augmentation(self.augmentation_config['val'], self.input_size, is_object_detection)
         val_dataset = ImageDataset.from_file(val_dataset_filepath, val_augmentation)
 
-        batch_size = self.config['batch_size']
-        collate_fn = functools.partial(_default_collate, self.config['task_type'])
-        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size, shuffle=True, num_workers=8, pin_memory=True, collate_fn=collate_fn)
-        val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size, shuffle=False, num_workers=8, pin_memory=True, collate_fn=collate_fn)
+        collate_fn = functools.partial(_default_collate, self.task_type)
+        train_dataloader = torch.utils.data.DataLoader(train_dataset, self.batch_size, shuffle=True, num_workers=8, pin_memory=True, collate_fn=collate_fn)
+        val_dataloader = torch.utils.data.DataLoader(val_dataset, self.batch_size, shuffle=False, num_workers=8, pin_memory=True, collate_fn=collate_fn)
 
         return train_dataloader, val_dataloader
 

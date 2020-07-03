@@ -11,6 +11,7 @@ setuptools.setup(name='mitorch',
                  entry_points={
                      'console_scripts': [
                          'micontrol=mitorch.service.control:main',
+                         'mitest=mitorch.test:main',
                          'mitrain=mitorch.train:main',
                          'misubmit=mitorch.service.submit:main',
                          'miquery=mitorch.service.query:main',
