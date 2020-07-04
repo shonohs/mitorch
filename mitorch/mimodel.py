@@ -97,8 +97,6 @@ class MiModel(pl.LightningModule):
         return self.model(x)
 
     def save(self, filepath):
-        assert isinstance(filepath, str)
-
         state_dict = self.model.state_dict()
         print(f"Saving a model to {filepath}")
         torch.save(state_dict, filepath)
