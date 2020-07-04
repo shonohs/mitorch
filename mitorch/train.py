@@ -4,6 +4,7 @@ import json
 import logging
 import pathlib
 import random
+import uuid
 import numpy
 import pytorch_lightning as pl
 import torch
@@ -58,7 +59,7 @@ def main():
     parser.add_argument('--weights_filepath', '-w', type=pathlib.Path)
     parser.add_argument('--output_filepath', '-o', type=pathlib.Path)
     parser.add_argument('--fast_dev_run', '-d', action='store_true')
-    parser.add_argument('--job_id')
+    parser.add_argument('--job_id', type=uuid.UUID)
     parser.add_argument('--db_url')
 
     args = parser.parse_args()
