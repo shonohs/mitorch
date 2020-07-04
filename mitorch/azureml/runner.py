@@ -64,8 +64,10 @@ class AzureMLRunner:
             train_filepath, val_filepath = self.download_dataset(dataset_name, work_dir)
             weights_filepath = self.download_weights(uuid.UUID(config['base']), work_dir) if 'base' in config else None
 
-            command = ['mitrain', str(config_filepath), str(train_filepath), str(val_filepath), '--weights_filepath', str(weights_filepath),
-                       '--output_filepath', str(output_filepath), '--job_id', str(self.job_id), '--db_url', self.db_url]
+            command = ['mitrain', str(config_filepath), str(train_filepath), str(val_filepath), '--output_filepath', str(output_filepath), '--job_id', str(self.job_id), '--db_url', self.db_url]
+            if weights_filepath:
+                commands.extend(['--weights_filepath', str(weights_filepath)])
+
             _logger.info(f"Starting the training. command: {command}")
             proc = subprocess.run(command)
             _logger.info(f"Training completed. returncode: {proc.returncode}")
