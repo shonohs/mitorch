@@ -1,22 +1,24 @@
 # MiTorch
-A simple training platform for PyTorch. Lots of public models are implemented and provided as a separated package, mytorch_models.
+A simple training platform for PyTorch.
 
-# Install
+The models are implemented in [mitorch-models](https://github.com/shonohs/mitorch_models).
+
+There are two ways to use this platform. Use as a simple training command on local machine, or use as a service.
+
+# Usage
+To install,
 ```bash
 pip install mitorch
 ```
 
-# Usage
-## Train one time on a local machine
+## Training Command
 ```bash
-mitrain <config_filepath> <train_filepath> <val_filepath> --w <weights_filepath> -o <output_filepath> [-d]
+mitrain <config_filepath> <train_filepath> <val_filepath> [-w <pth_filepath>] [-o <output_filepath>] [-d]
 ```
 - config_filepath
-  - Json-serialized configs
-- train_filepath
-  - Filepath to the training dataset
-- val_filepath
-  - Filepath to the validation dataset
+  - Json-serialized training config. For the detail, please see the sample configs in samples/ directory.
+- train_filepath / val_filepath
+  - Filepath to the training / validation dataset
 - weights_filepath
   - Optional base model weights
 - output_filepath
@@ -24,12 +26,17 @@ mitrain <config_filepath> <train_filepath> <val_filepath> --w <weights_filepath>
 - fast_dev_run [-d]
   - If set, run 1 iteration of training and validation to test a pipeline.
 
-The validatoin results will be on stdout.
+The validatoin results will be printed on stdout.
 
-## Train as a service
+## Validation Command
+```bash
+mitest <config_filepath> <train_filepath> <val_filepath> -w <weights_filepath> [-d]
+```
+
+# Usage as a service
 This library can be used as a service using AzureML and MongoDB. Queue training jobs to MongoDB, and the trainings will be run on AzureML instances. The training results will be stored on MongoDB after the trainings.
 
-### Set up a service
+## Setup
 First, you need to createa AzureML and MongoDB resource on Azure portal. For the detail of this step, please read the Azure official documents. Once you set up the resources, collect the following informations.
 - Subscription ID
 - AzureML workspace name
@@ -62,7 +69,7 @@ Third, run micontrol every 5 minutes. You can use any method to achive this step
 
 That's it. Now you are ready to use the service.
 
-### Commands for the service
+## Commands
 ```bash
 # Queue a new training
 misubmit <config_filepath> [--priority <priority>]
@@ -78,7 +85,7 @@ miviewer
 ```
 
 ## Data structures
-### Training job config strucutre
+### Training job config
 ```javascript
 {"_id": "<guid>",
  "status": "<status>", // "new", "running", "failed", or "completed".
@@ -87,8 +94,8 @@ miviewer
  "dataset": "<dataset name>",
  "config": {} // Training configs.
  }
-
-### Training config syntax
+```
+### Training config
 ```javascript
 {"base": "<guid>", // Existing training id
  "augmentation": {},
@@ -96,9 +103,8 @@ miviewer
  "model": {},
  "optimizer": {}
 }
-
 ```
-### Job config structure (For service)
+### Job config structure
 ```javascript
 {"job_type": "search", // Only "search" job is supported now.
 }
@@ -106,7 +112,7 @@ miviewer
 ### Dataset format
 TBD
 
-### MongoDB database structure (For service)
+### MongoDB database structure
 This library will create one database on the given MongoDB endpoint. The database name is "mitorch" by default.
 
 The database has the following collections.
@@ -118,10 +124,3 @@ The database has the following collections.
   - Hyper-parameter search jobs will be stored in this collection. One job can create multiple trainings.
 - datasets
   - Information of registered datasets. This collection needs to be created manually before the trainings.
-
-
-# TODO
-- Test
--- submit aml training job
-
-- Implement search job.

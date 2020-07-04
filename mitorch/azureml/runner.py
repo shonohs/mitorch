@@ -1,15 +1,15 @@
 """Runner script on AzureML instance
 
 The job of this script is:
-- Install required packages if AML hasn't
-- Download a target config from MongoDB.
+- Download a training config from MongoDB.
   - ID will be given as a commandline argument.
-- Download target datasets from Azure Storage.
-  - There is a json file to describe existing datasets.
+- Download training datasets from Azure Storage.
 - Download a base weights from Azure Storage if it is specified.
 - Run Train command
-- Upload the standard outputs to Azure Storage
 - Upload the trained model to Azure Storage
+- Run Test command
+- Upload the standard outputs to Azure Storage
+
 """
 import argparse
 import json
@@ -28,6 +28,7 @@ from mitorch.service import DatabaseClient
 
 _logger = logging.getLogger(__name__)
 
+
 class AzureMLRunner:
     def __init__(self, db_url, job_id):
         assert isinstance(job_id, uuid.UUID)
@@ -45,7 +46,7 @@ class AzureMLRunner:
         config = job['config']
         dataset_name = config['dataset']
         region = job['region']
-        print(config)
+        _logger.info(f"Training config: {config}")
 
         settings = self.client.get_settings()
         self.dataset_base_url = settings.dataset_url[region]
@@ -66,7 +67,7 @@ class AzureMLRunner:
 
             command = ['mitrain', str(config_filepath), str(train_filepath), str(val_filepath), '--output_filepath', str(output_filepath), '--job_id', str(self.job_id), '--db_url', self.db_url]
             if weights_filepath:
-                commands.extend(['--weights_filepath', str(weights_filepath)])
+                command.extend(['--weights_filepath', str(weights_filepath)])
 
             _logger.info(f"Starting the training. command: {command}")
             proc = subprocess.run(command)
@@ -144,12 +145,12 @@ def main():
     logging.getLogger('mitorch').setLevel(logging.DEBUG)
 
     parser = argparse.ArgumentParser("Run training on AzureML")
-    parser.add_argument('job_id', help="Guid for the target run")
+    parser.add_argument('job_id', type=uuid.UUID, help="Guid for the target run")
     parser.add_argument('db_url', help="MongoDB URI for training management")
 
     args = parser.parse_args()
 
-    runner = AzureMLRunner(args.db_url, uuid.UUID(args.job_id))
+    runner = AzureMLRunner(args.db_url, args.job_id)
     runner.run()
 
 

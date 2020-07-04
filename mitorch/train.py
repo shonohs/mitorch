@@ -3,21 +3,13 @@ import argparse
 import json
 import logging
 import pathlib
-import random
 import uuid
-import numpy
 import pytorch_lightning as pl
 import torch
 from .logger import StdoutLogger, MongoDBLogger
 from .mimodel import MiModel
 
 _logger = logging.getLogger(__name__)
-
-
-def set_random_seed(seed):
-    torch.manual_seed(seed)
-    numpy.random.seed(seed)
-    random.seed(seed)
 
 
 def train(config_filepath, train_dataset_filepath, val_dataset_filepath, weights_filepath, output_filepath, fast_dev_run, job_id, db_url):
@@ -27,14 +19,18 @@ def train(config_filepath, train_dataset_filepath, val_dataset_filepath, weights
     if job_id and db_url:
         logger.append(MongoDBLogger(db_url, job_id))
 
-    set_random_seed(0)
+    pl.seed_everything(0)
 
     config = json.loads(config_filepath.read_text())
 
     if fast_dev_run:
         config['batch_size'] = 2
 
-    gpus = -1 if torch.cuda.is_available() else None
+    num_processes = config.get('num_processes', -1)
+    gpus = num_processes if torch.cuda.is_available() else None
+    if num_processes > 1 and not gpus:
+        _logger.warning(f"Multiple processes are requested, but only 1 CPU is available on this node.")
+
     hparams = {'config': config, 'train_dataset_filepath': train_dataset_filepath, 'val_dataset_filepath': val_dataset_filepath, 'weights_filepath': weights_filepath}
     model = MiModel(hparams)
     for lo in logger:

@@ -4,8 +4,6 @@ import json
 import logging
 import pathlib
 import uuid
-import random
-import numpy
 import pytorch_lightning as pl
 import torch
 from .logger import StdoutLogger, MongoDBLogger
@@ -14,19 +12,13 @@ from .mimodel import MiModel
 _logger = logging.getLogger(__name__)
 
 
-def set_random_seed(seed):
-    torch.manual_seed(seed)
-    numpy.random.seed(seed)
-    random.seed(seed)
-
-
 def test(config_filepath, train_dataset_filepath, val_dataset_filepath, weights_filepath, fast_dev_run, job_id, db_url):
     _logger.info("started")
     logger = [StdoutLogger()]
     if job_id and db_url:
         logger.append(MongoDBLogger(db_url, job_id))
 
-    set_random_seed(0)
+    pl.seed_everything(0)
 
     config = json.loads(config_filepath.read_text())
 
