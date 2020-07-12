@@ -1,4 +1,5 @@
 import albumentations
+import cv2
 import numpy as np
 import torch
 import torchvision
@@ -55,6 +56,14 @@ class RandomResizedCropTransformV3(AlbumentationsTransform):
         super().__init__(transforms, is_object_detection)
 
 
+class RandomResizedCropTransformV4(AlbumentationsTransform):
+    def __init__(self, input_size, is_object_detection):
+        transforms = [albumentations.augmentations.transforms.RandomResizedCrop(input_size, input_size, interpolation=cv2.INTER_CUBIC),
+                      albumentations.augmentations.transforms.HorizontalFlip(),
+                      albumentations.augmentations.transforms.RandomBrightnessContrast()]
+        super().__init__(transforms, is_object_detection)
+
+
 class ResizeTransform(AlbumentationsTransform):
     def __init__(self, input_size, is_object_detection):
         transforms = [albumentations.augmentations.transforms.Resize(input_size, input_size)]
@@ -79,5 +88,13 @@ class RandomSizedBBoxSafeCropTransform(AlbumentationsTransform):
 class CenterCropTransform(AlbumentationsTransform):
     def __init__(self, input_size, is_object_detection):
         transforms = [albumentations.augmentations.transforms.SmallestMaxSize(input_size),
+                      albumentations.augmentations.transforms.CenterCrop(input_size, input_size)]
+        super().__init__(transforms, is_object_detection)
+
+
+class CenterCropTransformV2(AlbumentationsTransform):
+    """This method was found in pytorch's imagenet training example."""
+    def __init__(self, input_size, is_object_detection):
+        transforms = [albumentations.augmentations.transforms.SmallestMaxSize(int(input_size / 224 * 256)),
                       albumentations.augmentations.transforms.CenterCrop(input_size, input_size)]
         super().__init__(transforms, is_object_detection)

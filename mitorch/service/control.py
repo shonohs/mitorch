@@ -42,11 +42,11 @@ def process_trainings(client, aml_manager, db_url):
         for job in pending_jobs:
             submit_result = aml_manager.submit(db_url, job['_id'])
             if submit_result:
-                aml_run_id, region = submit_result
-                updated = client.update_training(job['_id'], {'status': 'queued', 'run_id': aml_run_id, 'region': region})
+                aml_run_id, aml_run_url, region = submit_result
+                updated = client.update_training(job['_id'], {'status': 'queued', 'run_id': aml_run_id, 'run_url': aml_run_url, 'region': region})
                 if not updated:
                     raise RuntimeError(f"Failed to update {job['_id']}")
-                print(f"Queued a new AML run: id: {job['_id']}, run_id: {aml_run_id}, region: {region}")
+                print(f"Queued a new AML run: id: {job['_id']}, run_id: {aml_run_id}, url: {aml_run_url}, region: {region}")
 
     # Check the status of ongoing tasks. If there is a task which is dead silently, update its record.
     jobs = list(client.get_running_trainings()) + list(client.get_queued_trainings())

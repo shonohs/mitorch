@@ -1,7 +1,8 @@
 import functools
 import logging
 import torch
-from ..datasets import (ImageDataset, CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform, RandomResizedCropTransformV2, RandomResizedCropTransformV3,
+from ..datasets import (ImageDataset, CenterCropTransform, CenterCropTransformV2, ResizeTransform, ResizeFlipTransform,
+                        RandomResizedCropTransform, RandomResizedCropTransformV2, RandomResizedCropTransformV3, RandomResizedCropTransformV4,
                         RandomSizedBBoxSafeCropTransform, InceptionTransform)
 
 
@@ -42,12 +43,14 @@ class DataLoaderBuilder:
     @staticmethod
     def build_augmentation(name, input_size, is_object_detection):
         augmentation_class = {'center_crop': CenterCropTransform,
+                              'center_crop_v2': CenterCropTransformV2,
                               'inception': InceptionTransform,
                               'resize': ResizeTransform,
                               'resize_flip': ResizeFlipTransform,
                               'random_resize': RandomResizedCropTransform,
                               'random_resize_v2': RandomResizedCropTransformV2,
                               'random_resize_v3': RandomResizedCropTransformV3,
+                              'random_resize_v4': RandomResizedCropTransformV4,
                               'random_resize_bbox': RandomSizedBBoxSafeCropTransform}.get(name)
 
         if not augmentation_class:

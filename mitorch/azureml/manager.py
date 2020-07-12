@@ -20,8 +20,8 @@ class AzureMLManager:
     def submit(self, *args):
         for manager in self.managers:
             if manager.get_num_available_nodes() > 0:
-                aml_run_id = manager.submit(*args)
-                return aml_run_id, manager.region
+                aml_run_id, aml_run_url = manager.submit(*args)
+                return aml_run_id, aml_run_url, manager.region
         return None
 
     def query(self, run_id, region):
@@ -73,7 +73,8 @@ class AzureMLSingleResourceManager:
             script_run_config = azureml.core.ScriptRunConfig(source_directory=temp_dir, script='boot.py', arguments=args, run_config=run_config)
             run = self.experiment.submit(config=script_run_config)
             run_id = run.get_details()['runId']
-            return run_id
+            run_url = run.get_portal_url()
+            return run_id, run_url
 
     def query(self, run_id):
         """Get the status of the specified run.

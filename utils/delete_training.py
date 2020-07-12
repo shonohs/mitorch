@@ -22,6 +22,7 @@ def remove_training(training_id):
         assert result
         print("Removed successfully")
 
+
 def remove_failed_trainings():
     env = Environment()
     client = DatabaseClient(env.db_url)
