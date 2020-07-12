@@ -23,6 +23,7 @@ import time
 import urllib
 import uuid
 import requests
+import tenacity
 import torch
 from mitorch.service import DatabaseClient
 
@@ -128,6 +129,7 @@ class AzureMLRunner:
         return AzureMLRunner._download_file(url, directory)
 
     @staticmethod
+    @tenacity.retry(tenacity.stop_after_attemp(3))
     def _download_file(url, directory):
         filename = os.path.basename(urllib.parse.urlparse(url).path)
         filepath = directory / filename
