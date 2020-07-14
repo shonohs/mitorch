@@ -39,6 +39,7 @@ class AzureMLRunner:
 
     def run(self):
         """First method to be run on AzureML instance"""
+        _logger.info("Started")
         # Get the job description from the database.
         job = self.client.find_training_by_id(self.job_id)
         if not job:
