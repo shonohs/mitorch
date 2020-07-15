@@ -52,7 +52,7 @@ def process_trainings(client, aml_manager, db_url):
     jobs = list(client.get_running_trainings()) + list(client.get_queued_trainings())
     for job in jobs:
         status = aml_manager.query(job['run_id'], job['region'])
-        if status in ['completed', 'failed']:
+        if status in ['completed', 'failed', 'canceled']:
             print(f"Unexpected run status: id: {job['_id']}, run_id: {job['run_id']}, status: {status}")
             updated = client.update_training(job['_id'], {'status': 'failed'})
             if not updated:
