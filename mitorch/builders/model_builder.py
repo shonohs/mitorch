@@ -1,4 +1,6 @@
+import hashlib
 import logging
+import pickle
 import torch
 from mitorch.models import ModelFactory
 
@@ -29,6 +31,7 @@ class ModelBuilder:
         if weights_filepath:
             self._load_weights(model, weights_filepath)
 
+        self._dump_model_hash(model)
         return model, criterion, predictor
 
     def _load_weights(self, model, weights_filepath):
@@ -57,3 +60,9 @@ class ModelBuilder:
             model.load_state_dict(weights, strict=False)
         except RuntimeError as e:
             logging.warning(f"Ignored load erros: {e}")
+
+    @staticmethod
+    def _dump_model_hash(model):
+        serialized = pickle.dumps({k: v.numpy() for k, v in model.state_dict().items()})
+        model_hash = hashlib.sha1(serialized).hexdigest()
+        logging.info(f"Model hash: {model_hash}")
