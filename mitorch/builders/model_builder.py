@@ -12,7 +12,8 @@ class ModelBuilder:
         num_classes = len(dataloader.dataset.labels)
         dataset_type = dataloader.dataset.dataset_type
 
-        model = ModelFactory.create(self.config['name'], num_classes)
+        model = ModelFactory.create(self.config['name'], num_classes, self.config['options'])
+
         if dataset_type == 'multiclass_classification':
             criterion = torch.nn.CrossEntropyLoss()
             predictor = torch.nn.Softmax(dim=1)
