@@ -27,6 +27,7 @@ def train(config_filepath, train_dataset_filepath, val_dataset_filepath, weights
         config['batch_size'] = 2
 
     num_processes = config.get('num_processes', -1)
+    accumulate_grad_batches = config.get('accumulate_grad_batches', 1)
     gpus = num_processes if torch.cuda.is_available() else None
     if num_processes > 1 and not gpus:
         _logger.warning(f"Multiple processes are requested, but only 1 CPU is available on this node.")
@@ -37,7 +38,8 @@ def train(config_filepath, train_dataset_filepath, val_dataset_filepath, weights
         lo.log_hyperparams({'model_versions': model.model_version})
 
     trainer = pl.Trainer(max_epochs=config['max_epochs'], fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend='ddp',
-                         logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=True)
+                         logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=True,
+                         accumulate_grad_batches=accumulate_grad_batches)
 
     trainer.fit(model)
     if output_filepath:
