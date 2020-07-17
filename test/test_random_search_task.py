@@ -24,7 +24,7 @@ class TestRandomSearchTask(unittest.TestCase):
             results.append(task.fetch_next())
             task.update_training_status({'status': 'completed'})
         results_set = set([str(r) for r in results])
-        self.assertEquals(len(results_set), 9)  # Most likely it covers all combinations.
+        self.assertEqual(len(results_set), 9)  # Most likely it covers all combinations.
 
     def test_complete_task(self):
         task = RandomSearchTask(self.BASE_CONFIG)

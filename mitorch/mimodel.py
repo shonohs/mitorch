@@ -19,7 +19,7 @@ class MiModel(pl.LightningModule):
         self.model = ModelBuilder(config).build(num_classes, weights_filepath)
         self.optimizer = OptimizerBuilder(config).build(self.model)
         self.lr_scheduler = LrSchedulerBuilder(config).build(self.optimizer, len(self._train_dataloader))
-        self.evaluator = self._get_evaluator(self._train_dataloader.dataset.dataset_type)
+        self.evaluator = self._get_evaluator(config['task_type'])
         self.train_epoch = 0
 
     @property

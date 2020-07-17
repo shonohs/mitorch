@@ -44,13 +44,8 @@ class ImageDataset:
         image_filepath, target = self.images[index]
         with self.reader.open(image_filepath, 'rb') as f:
             image = PIL.Image.open(f)
-            image = image.convert('RGB')  # Some image might have 1-channel. Also this method makes sure that the image is loaded.
-        target = self._process_target(target, image.size)
-        assert target is not None
+            image.load()
         return self.transform(image, target)
-
-    def _process_target(self, target, image_size):
-        return target
 
     def _load_target(self, target):
         raise NotImplementedError
@@ -127,10 +122,6 @@ class MulticlassClassificationDataset(ImageDataset):
     def _load_target(target):
         return int(target)
 
-    @property
-    def dataset_type(self):
-        return 'multiclass_classification'
-
 
 class MultilabelClassificationDataset(ImageDataset):
     def _get_max_label(self):
@@ -140,26 +131,12 @@ class MultilabelClassificationDataset(ImageDataset):
     def _load_target(target):
         return [int(t) for t in target.split(',')]
 
-    @property
-    def dataset_type(self):
-        return 'multilabel_classification'
-
 
 class ObjectDetectionDataset(ImageDataset):
     def _get_max_label(self):
         return max(j[0] for i in self.images for j in i[1])
 
     def _load_target(self, targetpath):
-        targets = []
         with self.reader.open(targetpath) as f:
-            for line in f:
-                l, x, y, x2, y2 = line.strip().split()
-                targets.append((int(l), float(x), float(y), float(x2), float(y2)))
-        return targets
-
-    def _process_target(self, target, image_size):
-        return target
-
-    @property
-    def dataset_type(self):
-        return 'object_detection'
+            # label, x_min, y_min, x_max, y_max. Those are not normalized.
+            return [(int(t[0]), float(t[1]), float(t[2]), float(t[3]), float(t[4])) for line in f for t in line.strip().split()]
