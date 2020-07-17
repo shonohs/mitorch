@@ -98,3 +98,11 @@ class CenterCropTransformV2(AlbumentationsTransform):
         transforms = [albumentations.augmentations.transforms.SmallestMaxSize(int(input_size / 224 * 256)),
                       albumentations.augmentations.transforms.CenterCrop(input_size, input_size)]
         super().__init__(transforms, is_object_detection)
+
+
+class CenterCropTransformV3(AlbumentationsTransform):
+    """This method was found in pytorch's imagenet training example."""
+    def __init__(self, input_size, is_object_detection):
+        transforms = [albumentations.augmentations.transforms.SmallestMaxSize(int(input_size / 224 * 256), interpolation=cv2.INTER_CUBIC),
+                      albumentations.augmentations.transforms.CenterCrop(input_size, input_size)]
+        super().__init__(transforms, is_object_detection)
