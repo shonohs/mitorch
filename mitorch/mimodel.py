@@ -15,7 +15,8 @@ class MiModel(pl.LightningModule):
         weights_filepath = hparams['weights_filepath']
 
         self._train_dataloader, self._val_dataloader = DataLoaderBuilder(config).build(train_dataset_filepath, val_dataset_filepath)
-        self.model, self.criterion, self.predictor = ModelBuilder(config).build(self._train_dataloader, weights_filepath)
+        num_classes = len(self._train_dataloader.dataset.labels)
+        self.model = ModelBuilder(config).build(num_classes, weights_filepath)
         self.optimizer = OptimizerBuilder(config).build(self.model)
         max_iters = len(self._train_dataloader) * config['max_epochs']
         self.lr_scheduler = LrSchedulerBuilder(config).build(self.optimizer, max_iters)
@@ -52,7 +53,7 @@ class MiModel(pl.LightningModule):
     def training_step(self, batch, batch_index):
         image, target = batch
         output = self.forward(image)
-        loss = self.criterion(output, target)
+        loss = self.model.loss(output, target)
         return {'loss': loss, 'log': {'train_loss': float(loss)}}
 
     def training_epoch_end(self, outputs):
@@ -63,8 +64,8 @@ class MiModel(pl.LightningModule):
     def validation_step(self, batch, batch_index):
         image, target = batch
         output = self.forward(image)
-        loss = self.criterion(output, target)
-        predictions = self.predictor(output)
+        loss = self.model.loss(output, target)
+        predictions = self.model.predictor(output)
         self.evaluator.add_predictions(predictions, target)
 
         return {'val_loss': loss}
@@ -80,8 +81,8 @@ class MiModel(pl.LightningModule):
     def test_step(self, batch, batch_index):
         image, target = batch
         output = self.forward(image)
-        loss = self.criterion(output, target)
-        predictions = self.predictor(output)
+        loss = self.model.loss(output, target)
+        predictions = self.model.predictor(output)
         self.evaluator.add_predictions(predictions, target)
         return {'test_loss': loss}
 
