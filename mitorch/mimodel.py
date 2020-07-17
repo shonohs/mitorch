@@ -1,3 +1,7 @@
+import hashlib
+import io
+import logging
+import os
 import pytorch_lightning as pl
 import torch
 from .builders import DataLoaderBuilder, LrSchedulerBuilder, ModelBuilder, OptimizerBuilder
@@ -78,12 +82,8 @@ class MiModel(pl.LightningModule):
         return {'log': results}
 
     def test_step(self, batch, batch_index):
-        image, target = batch
-        output = self.forward(image)
-        loss = self.model.loss(output, target)
-        predictions = self.model.predictor(output)
-        self.evaluator.add_predictions(predictions, target)
-        return {'test_loss': loss}
+        val_loss = self.validation_step(batch, batch_index)
+        return {'test_loss': val_loss['val_loss']}
 
     def test_epoch_end(self, outputs):
         results = self.evaluator.get_report()
@@ -98,8 +98,16 @@ class MiModel(pl.LightningModule):
 
     def save(self, filepath):
         state_dict = self.model.state_dict()
-        print(f"Saving a model to {filepath}")
-        torch.save(state_dict, filepath)
+        if os.getenv('LOCAL_RANK', 0) == 0:
+            logging.info(f"Saving a model to {filepath}")
+            torch.save(state_dict, filepath)
+
+        # Record the model hash.
+        bytesio = io.BytesIO()
+        torch.save(state_dict, bytesio)
+        bytesio.seek(0)
+        model_hash = hashlib.sha1(bytesio.getvalue()).hexdigest()
+        logging.info(f"Model hash: {model_hash}")
 
     def _log_epoch_metrics(self, metrics, epoch):
         loggers = self.logger.experiment if isinstance(self.logger.experiment, list) else [self.logger.experiment]
