@@ -18,8 +18,7 @@ class MiModel(pl.LightningModule):
         num_classes = len(self._train_dataloader.dataset.labels)
         self.model = ModelBuilder(config).build(num_classes, weights_filepath)
         self.optimizer = OptimizerBuilder(config).build(self.model)
-        max_iters = len(self._train_dataloader) * config['max_epochs']
-        self.lr_scheduler = LrSchedulerBuilder(config).build(self.optimizer, max_iters)
+        self.lr_scheduler = LrSchedulerBuilder(config).build(self.optimizer, len(self._train_dataloader))
         self.evaluator = self._get_evaluator(self._train_dataloader.dataset.dataset_type)
         self.train_epoch = 0
 

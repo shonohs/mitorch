@@ -17,12 +17,12 @@ class TestLrScheduler(unittest.TestCase):
 
     def test_warmup_lr(self):
         parameters = torch.nn.Conv2d(1, 1, 1).parameters()
-        optimizer = torch.optim.SGD(parameters, lr=1)
+        optimizer = torch.optim.SGD([{'params': parameters, 'initial_lr': 0.3}], lr=0.3)
         scheduler = LinearDecreasingLR(optimizer, 100)
         warmup_scheduler = WarmupLR(scheduler, 5, 0.01)
 
         lrs = self.step_and_get_lr(warmup_scheduler, optimizer, 10)
-        expected_lrs = [0.01, 0.01, 0.01, 0.01, 0.01, 0.94, 0.93, 0.92, 0.91, 0.90]
+        expected_lrs = [0.003, 0.003, 0.003, 0.003, 0.003, 0.3*0.94, 0.3*0.93, 0.3*0.92, 0.3*0.91, 0.3*0.90]
         for lr, expected in zip(lrs, expected_lrs):
             self.assertAlmostEqual(lr, expected)
 
