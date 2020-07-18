@@ -44,7 +44,7 @@ class ImageDataset:
         image_filepath, target = self.images[index]
         with self.reader.open(image_filepath, 'rb') as f:
             image = PIL.Image.open(f)
-            image.load()
+            image = image.convert('RGB')  # Some image might have 1-channel. Also this method makes sure that the image is loaded.
         return self.transform(image, target)
 
     def _load_target(self, target):
