@@ -139,4 +139,5 @@ class ObjectDetectionDataset(ImageDataset):
     def _load_target(self, targetpath):
         with self.reader.open(targetpath) as f:
             # label, x_min, y_min, x_max, y_max. Those are not normalized.
-            return [(int(t[0]), float(t[1]), float(t[2]), float(t[3]), float(t[4])) for line in f for t in line.strip().split()]
+            targets = [line.strip().split() for line in f]
+            return [(int(t[0]), float(t[1]), float(t[2]), float(t[3]), float(t[4])) for t in targets]

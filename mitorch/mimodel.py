@@ -31,14 +31,12 @@ class MiModel(pl.LightningModule):
         return self.model.version
 
     @staticmethod
-    def _get_evaluator(dataset_type):
-        if dataset_type == 'multiclass_classification':
-            return MulticlassClassificationEvaluator()
-        elif dataset_type == 'multilabel_classification':
-            return MultilabelClassificationEvaluator()
-        elif dataset_type == 'object_detection':
-            return ObjectDetectionEvaluator()
-        raise NotImplementedError
+    def _get_evaluator(task_type):
+        mappings = {'multiclass_classification': MulticlassClassificationEvaluator,
+                    'multilabel_classification': MultilabelClassificationEvaluator,
+                    'object_detection': ObjectDetectionEvaluator}
+        assert task_type in mappings
+        return mappings[task_type]()
 
     def configure_optimizers(self):
         # lr_scheduler.step() is called after every training steps.
