@@ -55,6 +55,7 @@ class MiModel(pl.LightningModule):
         image, target = batch
         output = self.forward(image)
         loss = self.model.loss(output, target)
+        self.get_model_hash()
         return {'loss': loss, 'log': {'train_loss': float(loss)}}
 
     def training_epoch_end(self, outputs):
@@ -103,11 +104,14 @@ class MiModel(pl.LightningModule):
     def _get_model_hash(self):
         state_dict = self.model.state_dict()
         values = {}
+
         for key in state_dict:
             bytesio = io.BytesIO()
             torch.save(state_dict[key], bytesio)
             bytesio.seek(0)
             values[key] = hashlib.sha1(bytesio.getvalue()).hexdigest()
+        attention = state_dict['base_model.features.conv0.conv.weight']
+        logging.info(f"NODE{os.getenv('LOCAL_RANK')} base_model.features.conv0.conv.weight: mean: {torch.mean(attention)}, max: {torch.mean(attention)}")
         return values
 
 
