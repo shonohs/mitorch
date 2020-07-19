@@ -33,3 +33,13 @@ class InceptionTransform(Transform):
                       torchvision.transforms.ToTensor(),
                       torchvision.transforms.Normalize(INPUT_MEAN, [1, 1, 1], inplace=True)]
         super().__init__(transforms)
+
+
+class DevTransform(Transform):
+    """Temporarl transforms for development."""
+    def __init__(self, input_size, is_object_detection=False):
+        transforms = [torchvision.transforms.RandomResizedCrop(input_size),
+                      torchvision.transforms.RandomHorizontalFlip(),
+                      torchvision.transforms.ToTensor(),
+                      torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
+        super().__init__(transforms)
