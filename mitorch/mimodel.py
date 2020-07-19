@@ -104,7 +104,7 @@ class MiModel(pl.LightningModule):
     def _get_model_hash(self):
         state_dict = self.model.state_dict()
         values = {}
-        attention = state_dict['base_model.features.conv0.conv.weight']
+        attention = state_dict['base_model.features.conv0.conv.weight'].cpu()
         bytesio = io.BytesIO()
         torch.save(attention, bytesio)
         bytesio.seek(0)
