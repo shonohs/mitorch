@@ -1,8 +1,6 @@
-import hashlib
-import io
 import logging
-import os
 import pytorch_lightning as pl
+from pytorch_lightning.utilities import rank_zero_only
 import torch
 from .builders import DataLoaderBuilder, LrSchedulerBuilder, ModelBuilder, OptimizerBuilder
 from .evaluators import MulticlassClassificationEvaluator, MultilabelClassificationEvaluator, ObjectDetectionEvaluator
@@ -55,7 +53,6 @@ class MiModel(pl.LightningModule):
         image, target = batch
         output = self.forward(image)
         loss = self.model.loss(output, target)
-        self._get_model_hash()
         return {'loss': loss, 'log': {'train_loss': float(loss)}}
 
     def training_epoch_end(self, outputs):
@@ -94,27 +91,11 @@ class MiModel(pl.LightningModule):
     def forward(self, x):
         return self.model(x)
 
+    @rank_zero_only
     def save(self, filepath):
-        print(f"save: NODE{os.getenv('LOCAL_RANK')} Model hash: {self._get_model_hash()}")
-        if int(os.getenv('LOCAL_RANK', 0)) == 0:
-            logging.info(f"Saving a model to {filepath}")
-            state_dict = self.model.state_dict()
-            torch.save(state_dict, filepath)
-
-    def _get_model_hash(self):
+        logging.info(f"Saving a model to {filepath}")
         state_dict = self.model.state_dict()
-        values = {}
-        attention = state_dict['base_model.features.conv0.conv.weight'].cpu()
-        np_attention = state_dict['base_model.features.conv0.conv.weight'].cpu().numpy()
-        bytesio = io.BytesIO()
-        import numpy
-        numpy.save(bytesio, np_attention)
-        bytesio.seek(0)
-        attention_hash = hashlib.sha1(bytesio.getvalue()).hexdigest()
-
-        logging.info(f"NODE{os.getenv('LOCAL_RANK')} base_model.features.conv0.conv.weight: mean: {torch.mean(attention)}, max: {torch.mean(attention)} np hash: {attention_hash}")
-        return values
-
+        torch.save(state_dict, filepath)
 
     def _log_epoch_metrics(self, metrics, epoch):
         loggers = self.logger.experiment if isinstance(self.logger.experiment, list) else [self.logger.experiment]
