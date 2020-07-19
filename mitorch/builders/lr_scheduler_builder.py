@@ -58,8 +58,9 @@ class LrSchedulerBuilder:
         else:
             raise NotImplementedError(f"Unsupported LR scheduler: {self.config['name']}")
 
-        warmup_iters = self.config.get('warmup_iters', -1)
-        if warmup_iters > 0:
+        warmup_epochs = self.config.get('warmup_epochs', -1)
+        if warmup_epochs > 0:
+            warmup_iters = warmup_epochs * num_epoch_iters
             warmup_factor = self.config.get('warmup_factor', 0.01)
             lr_scheduler = WarmupLR(lr_scheduler, warmup_iters, warmup_factor)
             logging.info(f"Using Lr Warmup: {warmup_iters} iters with {warmup_factor}")
