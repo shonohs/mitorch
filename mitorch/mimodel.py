@@ -55,7 +55,7 @@ class MiModel(pl.LightningModule):
         image, target = batch
         output = self.forward(image)
         loss = self.model.loss(output, target)
-        self.get_model_hash()
+        self._get_model_hash()
         return {'loss': loss, 'log': {'train_loss': float(loss)}}
 
     def training_epoch_end(self, outputs):
