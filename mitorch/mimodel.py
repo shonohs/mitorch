@@ -95,7 +95,7 @@ class MiModel(pl.LightningModule):
         return self.model(x)
 
     def save(self, filepath):
-        logging.info(f"Model hash: {self._get_model_hash()}")
+        print(f"save: NODE{os.getenv('LOCAL_RANK')} Model hash: {self._get_model_hash()}")
         if int(os.getenv('LOCAL_RANK', 0)) == 0:
             logging.info(f"Saving a model to {filepath}")
             state_dict = self.model.state_dict()
@@ -104,14 +104,13 @@ class MiModel(pl.LightningModule):
     def _get_model_hash(self):
         state_dict = self.model.state_dict()
         values = {}
-
-        for key in state_dict:
-            bytesio = io.BytesIO()
-            torch.save(state_dict[key], bytesio)
-            bytesio.seek(0)
-            values[key] = hashlib.sha1(bytesio.getvalue()).hexdigest()
         attention = state_dict['base_model.features.conv0.conv.weight']
-        logging.info(f"NODE{os.getenv('LOCAL_RANK')} base_model.features.conv0.conv.weight: mean: {torch.mean(attention)}, max: {torch.mean(attention)}")
+        bytesio = io.BytesIO()
+        torch.save(attention, bytesio)
+        bytesio.seek(0)
+        attention_hash = hashlib.sha1(bytesio.getvalue()).hexdigest()
+
+        logging.info(f"NODE{os.getenv('LOCAL_RANK')} base_model.features.conv0.conv.weight: mean: {torch.mean(attention)}, max: {torch.mean(attention)} hash: {attention_hash}")
         return values
 
 
