@@ -104,13 +104,15 @@ class MiModel(pl.LightningModule):
     def _get_model_hash(self):
         state_dict = self.model.state_dict()
         values = {}
-        attention = state_dict['base_model.features.conv0.conv.weight'].cpu().numpy()
+        attention = state_dict['base_model.features.conv0.conv.weight'].cpu()
+        np_attention = state_dict['base_model.features.conv0.conv.weight'].cpu().numpy()
         bytesio = io.BytesIO()
-        torch.save(attention, bytesio)
+        import numpy
+        numpy.save(bytesio, np_attention)
         bytesio.seek(0)
         attention_hash = hashlib.sha1(bytesio.getvalue()).hexdigest()
 
-        logging.info(f"NODE{os.getenv('LOCAL_RANK')} base_model.features.conv0.conv.weight: mean: {torch.mean(attention)}, max: {torch.mean(attention)} hash: {attention_hash}")
+        logging.info(f"NODE{os.getenv('LOCAL_RANK')} base_model.features.conv0.conv.weight: mean: {torch.mean(attention)}, max: {torch.mean(attention)} np hash: {attention_hash}")
         return values
 
 
