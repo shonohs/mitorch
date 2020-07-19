@@ -3,7 +3,7 @@ import logging
 import torch
 from ..datasets import (ImageDataset, CenterCropTransform, CenterCropTransformV2, CenterCropTransformV3, ResizeTransform, ResizeFlipTransform,
                         RandomResizedCropTransform, RandomResizedCropTransformV2, RandomResizedCropTransformV3, RandomResizedCropTransformV4,
-                        RandomSizedBBoxSafeCropTransform, InceptionTransform, DevTransform)
+                        RandomSizedBBoxSafeCropTransform, InceptionTransform, DevTransform, Dev2Transform)
 
 
 def _default_collate(task_type, batch):
@@ -46,6 +46,7 @@ class DataLoaderBuilder:
                               'center_crop_v2': CenterCropTransformV2,
                               'center_crop_v3': CenterCropTransformV3,
                               'dev': DevTransform,
+                              'dev2': Dev2Transform,
                               'inception': InceptionTransform,
                               'resize': ResizeTransform,
                               'resize_flip': ResizeFlipTransform,
