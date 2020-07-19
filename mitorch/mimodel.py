@@ -68,7 +68,6 @@ class MiModel(pl.LightningModule):
         loss = self.model.loss(output, target)
         predictions = self.model.predictor(output)
         self.evaluator.add_predictions(predictions, target)
-
         return {'val_loss': loss}
 
     def validation_epoch_end(self, outputs):
@@ -95,17 +94,22 @@ class MiModel(pl.LightningModule):
         return self.model(x)
 
     def save(self, filepath):
-        state_dict = self.model.state_dict()
-        if os.getenv('LOCAL_RANK', 0) == 0:
+        logging.info(f"Model hash: {self._get_model_hash()}")
+        if int(os.getenv('LOCAL_RANK', 0)) == 0:
             logging.info(f"Saving a model to {filepath}")
+            state_dict = self.model.state_dict()
             torch.save(state_dict, filepath)
 
-        # Record the model hash.
-        bytesio = io.BytesIO()
-        torch.save(state_dict, bytesio)
-        bytesio.seek(0)
-        model_hash = hashlib.sha1(bytesio.getvalue()).hexdigest()
-        logging.info(f"Model hash: {model_hash}")
+    def _get_model_hash(self):
+        state_dict = self.model.state_dict()
+        values = {}
+        for key in state_dict:
+            bytesio = io.BytesIO()
+            torch.save(state_dict[key], bytesio)
+            bytesio.seek(0)
+            values[key] = hashlib.sha1(bytesio.getvalue()).hexdigest()
+        return values
+
 
     def _log_epoch_metrics(self, metrics, epoch):
         loggers = self.logger.experiment if isinstance(self.logger.experiment, list) else [self.logger.experiment]

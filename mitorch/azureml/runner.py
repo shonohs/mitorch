@@ -73,11 +73,18 @@ class AzureMLRunner:
 
             _logger.info(f"Starting the training. command: {command}")
             proc = subprocess.run(command)
-            _logger.info(f"Training completed. returncode: {proc.returncode}")
 
-            if proc.returncode != 0 or not output_filepath.exists():
+            if proc.returncode != 0:
+                _logger.error(f"Training failed. return code is {proc.returncode}")
                 self.client.fail_training(self.job_id)
                 return
+
+            if not output_filepath.exists():
+                _logger.error(f"Training failed to generate the output file {output_filepath}")
+                self.client.fail_training(self.job_id)
+                return
+
+            _logger.info("Training completed.")
 
             self.upload_files([output_filepath])
 
