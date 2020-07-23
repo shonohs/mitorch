@@ -29,7 +29,6 @@ class WarmupLR(torch.optim.lr_scheduler.LambdaLR):
             return self.true_lrs
 
     def step(self, iteration=None):
-        # In warmup period, call the original lr_scheduler first, then overwrite the lr with warmup LR.
         if self.true_lrs:
             for group, lr in zip(self.lr_scheduler.optimizer.param_groups, self.true_lrs):
                 group['lr'] = lr
@@ -37,6 +36,15 @@ class WarmupLR(torch.optim.lr_scheduler.LambdaLR):
         self.lr_scheduler.step()
         self.true_lrs = [group['lr'] for group in self.lr_scheduler.optimizer.param_groups]
         super().step()
+
+
+class LinearWarmupLR(WarmupLR):
+    def get_lr(self):
+        if self.last_epoch <= self.warmup_iters:
+            ratio = self.warmup_factor + (1 - self.warmup_factor) * self.last_epoch / self.warmup_iters
+            return [base_lr * ratio for base_lr in self.base_lrs]
+        else:
+            return super().get_lr()
 
 
 class LrSchedulerBuilder:
@@ -58,11 +66,17 @@ class LrSchedulerBuilder:
         else:
             raise NotImplementedError(f"Unsupported LR scheduler: {self.config['name']}")
 
-        warmup_epochs = self.config.get('warmup_epochs', -1)
-        if warmup_epochs > 0:
+        warmup_scheduler = self.config.get('warmup')
+        if warmup_scheduler:
+            warmup_epochs = self.config.get('warmup_epochs')
             warmup_iters = warmup_epochs * num_epoch_iters
             warmup_factor = self.config.get('warmup_factor', 0.01)
-            lr_scheduler = WarmupLR(lr_scheduler, warmup_iters, warmup_factor)
-            logging.info(f"Using Lr Warmup: {warmup_iters} iters with {warmup_factor}")
+            if warmup_scheduler == 'const':
+                lr_scheduler = WarmupLR(lr_scheduler, warmup_iters, warmup_factor)
+            elif warmup_scheduler == 'linear':
+                lr_scheduler = LinearWarmupLR(lr_scheduler, warmup_iters, warmup_factor)
+            else:
+                raise NotImplementedError
+            logging.info(f"Using Lr Warmup {warmup_scheduler}: {warmup_iters} iters with {warmup_factor}")
 
         return lr_scheduler
