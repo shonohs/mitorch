@@ -60,7 +60,8 @@ class AzureMLSingleResourceManager:
         run_config.target = self.cluster
         dependencies = azureml.core.conda_dependencies.CondaDependencies()
         dependencies.set_python_version('3.7')
-        dependencies.add_pip_package('torch==1.5.1')
+        dependencies.add_pip_package('torch~=1.5')
+        dependencies.add_pip_package('torchvision~=0.6')
         run_config.environment.python.conda_dependencies = dependencies
         # Specify a docker base image since the default one is ubuntu 16.04.
         run_config.environment.docker.enabled = True

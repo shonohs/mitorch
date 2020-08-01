@@ -55,6 +55,7 @@ class AzureMLRunner:
         self.blob_storage_url = settings.storage_url
 
         # Record machine setup.
+        os.system('df -h')
         num_gpus = torch.cuda.device_count()
         self.client.start_training(self.job_id, num_gpus)
 
