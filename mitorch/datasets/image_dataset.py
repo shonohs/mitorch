@@ -140,4 +140,5 @@ class ObjectDetectionDataset(ImageDataset):
         with self.reader.open(targetpath) as f:
             # label, x_min, y_min, x_max, y_max. Those are not normalized.
             targets = [line.strip().split() for line in f]
-            return [(int(t[0]), float(t[1]), float(t[2]), float(t[3]), float(t[4])) for t in targets]
+            targets = [(int(t[0]), int(t[1]), int(t[2]), int(t[3]), int(t[4])) for t in targets]
+            return [t for t in targets if t[1] < t[3] and t[2] < t[4]]  # Remove invalid bounding boxes.
