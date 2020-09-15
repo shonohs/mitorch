@@ -77,11 +77,14 @@ class DatabaseClient:
 
     # Datasets
     def find_dataset_by_name(self, dataset_name, version=None):
-        # TODO: Get the latest version
+        # TODO: Find the latest version.
         return self.db.datasets.find_one({'name': dataset_name})
 
     def add_dataset(self, dataset):
         return self.db.datasets.insert_one(dataset)
+
+    def delete_dataset(self, dataset_id):
+        self.db.datasets.delete_one({'_id': dataset_id})
 
     # Common Settings
     def get_settings(self):

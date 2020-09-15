@@ -93,7 +93,7 @@ class AzureMLSingleResourceManager:
         """Get the number of available nodes"""
         status = self.cluster.get_status()
         s = status.serialize()
-        return s['scaleSettings']['maxNodeCount'] - s['currentNodeCount']
+        return s['scaleSettings']['maxNodeCount'] - s['currentNodeCount'] + s['nodeStateCounts']['idleNodeCount']
 
     @staticmethod
     def _generate_bootstrap(directory):

@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import time
 
 from ..azureml import AzureMLManager
@@ -7,6 +8,8 @@ from ..environment import Environment
 from .database_client import DatabaseClient
 from .task import Task
 
+
+logger = logging.getLogger(__name__)
 
 def control_loop(env):
     while True:
@@ -37,6 +40,7 @@ def control(env):
 def process_trainings(client, aml_manager, db_url):
     # If there are available resources, submit new AML jobs
     num_available_nodes = aml_manager.get_num_available_nodes()
+    logger.debug(f"Found {num_available_nodes} available nodes.")
     if num_available_nodes > 0:
         pending_jobs = client.get_new_trainings(num_available_nodes)
         for job in pending_jobs:
@@ -78,7 +82,8 @@ def process_tasks(client):
 
 
 def main():
-    parser = argparse.ArgumentParser("Control")
+    logger.setLevel(logging.DEBUG)
+    parser = argparse.ArgumentParser(description="Manage training jobs.")
     parser.add_argument('--loop', '-l', action='store_true', help="Keep running until interuppted. The jobs will be processed every 5 minutes.")
     args = parser.parse_args()
 
