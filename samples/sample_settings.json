@@ -1,0 +1,15 @@
+{
+    "storage_url": "https://...",
+    "readonly_storage_url": "https://...",
+    "dataset_url": {
+        "wus2": "https://..."
+    },
+    "azureml_settings": [
+        {
+            "subscription_id": "0000",
+            "workspace_name": "name",
+            "cluster_name": "name",
+            "region_name": "wus2"
+        }
+    ]
+}

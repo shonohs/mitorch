@@ -28,10 +28,10 @@ class ImageDataset:
         if labels_filepath.exists():
             with open(labels_filepath) as f:
                 labels = [l.strip() for l in f.readlines()]
-                assert len(labels) >= max_label
+                assert len(labels) > max_label
                 return labels
         else:
-            return [f'label_{i}' for i in range(max_label)]
+            return [f'label_{i}' for i in range(max_label + 1)]
 
     @property
     def labels(self):
@@ -44,6 +44,7 @@ class ImageDataset:
         image_filepath, target = self.images[index]
         with self.reader.open(image_filepath, 'rb') as f:
             image = PIL.Image.open(f)
+            image = image.convert('RGB')  # Some image might have 1-channel. Also this method makes sure that the image is loaded.
         return self.transform(image, target)
 
     def _load_target(self, target):
@@ -99,11 +100,18 @@ class FileReader:
     def open(self, filepath, mode='r'):
         if '@' in filepath:
             zip_filepath, filepath = filepath.split('@')
-            if not zip_filepath in self.zipfile_cache:
+            if zip_filepath not in self.zipfile_cache:
                 self.zipfile_cache[zip_filepath] = ThreadSafeZipFile(self.base_dir / zip_filepath)
             return self.zipfile_cache[zip_filepath].open(filepath)
         else:
             return open(self.base_dir / filepath, mode)
+
+    def __getstate__(self):
+        return {'base_dir': self.base_dir}
+
+    def __setstate__(self, state):
+        self.base_dir = state['base_dir']
+        self.zipfile_cache = {}
 
 
 class MulticlassClassificationDataset(ImageDataset):
@@ -114,10 +122,6 @@ class MulticlassClassificationDataset(ImageDataset):
     def _load_target(target):
         return int(target)
 
-    @property
-    def dataset_type(self):
-        return 'multiclass_classification'
-
 
 class MultilabelClassificationDataset(ImageDataset):
     def _get_max_label(self):
@@ -127,23 +131,14 @@ class MultilabelClassificationDataset(ImageDataset):
     def _load_target(target):
         return [int(t) for t in target.split(',')]
 
-    @property
-    def dataset_type(self):
-        return 'multilabel_classification'
-
 
 class ObjectDetectionDataset(ImageDataset):
     def _get_max_label(self):
         return max(j[0] for i in self.images for j in i[1])
 
     def _load_target(self, targetpath):
-        targets = []
         with self.reader.open(targetpath) as f:
-            for line in f:
-                l, x, y, x2, y2 = line.strip().split()
-                targets.append((int(l), float(x), float(y), float(x2), float(y2)))
-        return targets
-
-    @property
-    def dataset_type(self):
-        return 'object_detection'
+            # label, x_min, y_min, x_max, y_max. Those are not normalized.
+            targets = [line.strip().split() for line in f]
+            targets = [(int(t[0]), int(float(t[1])), int(float(t[2])), int(float(t[3])), int(float(t[4]))) for t in targets]
+            return [t for t in targets if t[1] < t[3] and t[2] < t[4]]  # Remove invalid bounding boxes.

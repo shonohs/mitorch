@@ -6,11 +6,18 @@ setuptools.setup(name='mitorch',
                  author='shono',
                  description="MiTorch training framework",
                  url='https://github.com/shonohs/mitorch',
-                 packages=setuptools.find_packages(),
-                 install_requires=['mitorch-models', 'pytorch_lightning', 'torch', 'torchvision', 'sklearn'],
+                 packages=setuptools.find_namespace_packages(include=['mitorch', 'mitorch.*']),
+                 install_requires=['mitorch-models', 'pymongo', 'pytorch_lightning~=0.8', 'requests', 'tenacity', 'torch>=1.4.0', 'torchvision>=0.5.0', 'sklearn', 'azureml-sdk', 'albumentations'],
                  entry_points={
                      'console_scripts': [
-                         'mitrain=mitorch.train:main'
+                         'micontrol=mitorch.service.control:main',
+                         'mitest=mitorch.test:main',
+                         'mitrain=mitorch.train:main',
+                         'misubmit=mitorch.service.submit:main',
+                         'miquery=mitorch.service.query:main',
+                         'miamlmanager=mitorch.azureml.manager:main',
+                         'miamlrun=mitorch.azureml.runner:main',
+                         'midataset=mitorch.service.dataset:main'
                          ]
                  },
                  classifiers=[
