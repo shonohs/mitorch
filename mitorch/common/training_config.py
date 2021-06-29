@@ -45,6 +45,7 @@ class TrainingConfig:
     task_type: str
     batch_size: int
     max_epochs: int
+    use_fp16: bool = True
     model: ModelConfig = None
     augmentation: AugmentationConfig = None
     lr_scheduler: LrSchedulerConfig = None

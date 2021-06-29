@@ -30,16 +30,23 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
 
     _logger.debug(f"Loaded config: {config}")
 
-    gpus = config.num_processes if torch.cuda.is_available() else None
-    if config.num_processes > 1 and not gpus:
-        _logger.warning("Multiple processes are requested, but only 1 CPU is available on this node.")
+    if torch.cuda.is_available():
+        precision = 16 if config.use_fp16 else 32
+        gpus = config.num_processes
+    else:
+        precision = 32
+        gpus = None
+        if config.num_processes > 1:
+            _logger.warning("Multiple processes are requested, but only 1 CPU is available on this node.")
+        if config.use_fp16:
+            _logger.warning("AMP is requested, but GPU is not available.")
 
     train_dataloader, val_dataloader = DataLoaderBuilder(config).build(train_dataset_filepath, val_dataset_filepath)
     num_classes = len(train_dataloader.dataset.labels) if train_dataloader else len(val_dataloader.dataset.labels)
 
     trainer = pl.Trainer(max_epochs=config.max_epochs, fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend='ddp', terminate_on_nan=True,
                          logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=False,
-                         accumulate_grad_batches=config.accumulate_grad_batches, checkpoint_callback=False)
+                         accumulate_grad_batches=config.accumulate_grad_batches, checkpoint_callback=False, precision=precision)
 
     model = MiModel(config, num_classes, weights_filepath)
     trainer.fit(model, train_dataloader, val_dataloader)
