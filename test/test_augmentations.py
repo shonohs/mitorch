@@ -1,7 +1,7 @@
 import unittest
 import PIL.Image
 import torch
-from mitorch.datasets import ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform
+from mitorch.datasets.albumentations_transforms import ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform
 
 
 TRANSFORMS = [ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform]

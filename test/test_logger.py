@@ -1,7 +1,7 @@
 import pickle
 import unittest
 import uuid
-from mitorch.logger import MongoDBLogger
+from mitorch.common.logger import MongoDBLogger
 
 
 class TestLogger(unittest.TestCase):
@@ -10,8 +10,8 @@ class TestLogger(unittest.TestCase):
         training_id = uuid.uuid4()
         logger = MongoDBLogger(url, training_id)
         new_logger = pickle.loads(pickle.dumps(logger))
-        self.assertEqual(new_logger.training_id, training_id)
-        self.assertIsNotNone(new_logger.client)
+        self.assertEqual(new_logger._job_id, training_id)
+        self.assertIsNotNone(new_logger._client)
 
 
 if __name__ == '__main__':

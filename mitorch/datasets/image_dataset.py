@@ -27,7 +27,7 @@ class ImageDataset:
         labels_filepath = self.base_dir / 'labels.txt'
         if labels_filepath.exists():
             with open(labels_filepath) as f:
-                labels = [l.strip() for l in f.readlines()]
+                labels = [line.strip() for line in f.readlines()]
                 assert len(labels) > max_label
                 return labels
         else:

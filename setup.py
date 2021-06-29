@@ -7,17 +7,21 @@ setuptools.setup(name='mitorch',
                  description="MiTorch training framework",
                  url='https://github.com/shonohs/mitorch',
                  packages=setuptools.find_namespace_packages(include=['mitorch', 'mitorch.*']),
-                 install_requires=['mitorch-models', 'pymongo', 'pytorch_lightning~=0.8', 'requests', 'tenacity', 'torch>=1.4.0', 'torchvision>=0.5.0', 'sklearn', 'azureml-sdk', 'albumentations'],
+                 install_requires=['mitorch-models',
+                                   'pymongo',
+                                   'pytorch_lightning~=1.3.0',
+                                   'requests',
+                                   'tenacity',
+                                   'torch~=1.9.0',
+                                   'torchvision>=0.5.0',
+                                   'sklearn',
+                                   'albumentations'],
                  entry_points={
                      'console_scripts': [
-                         'micontrol=mitorch.service.control:main',
-                         'mitest=mitorch.test:main',
-                         'mitrain=mitorch.train:main',
-                         'misubmit=mitorch.service.submit:main',
-                         'miquery=mitorch.service.query:main',
-                         'miamlmanager=mitorch.azureml.manager:main',
-                         'miamlrun=mitorch.azureml.runner:main',
-                         'midataset=mitorch.service.dataset:main'
+                         'miagent=mitorch.commands.agent:main',
+                         'misubmit=mitorch.commands.submit:main',
+                         'mitrain=mitorch.commands.train:main',
+                         'miquery=mitorch.commands.query:main',
                          ]
                  },
                  classifiers=[
@@ -26,4 +30,5 @@ setuptools.setup(name='mitorch',
                      'Programming Language :: Python :: 3 :: Only',
                      'Topic :: Scientific/Engineering :: Artificial Intelligence'
                  ],
+                 python_requires='>=3.8',
                  license='MIT')

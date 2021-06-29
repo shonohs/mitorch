@@ -4,13 +4,13 @@ import torch.optim
 
 class OptimizerBuilder:
     def __init__(self, config):
-        self.config = config['optimizer']
-        self.base_lr = config['lr_scheduler']['base_lr']
+        self.config = config.optimizer
+        self.base_lr = config.lr_scheduler.base_lr
 
     def build(self, model):
         logging.info(f"Building a optimizer. base_lr: {self.base_lr}, config: {self.config}")
-        momentum = self.config['momentum']
-        weight_decay = self.config['weight_decay']
+        momentum = self.config.momentum
+        weight_decay = self.config.weight_decay
 
         assert isinstance(self.base_lr, float) and self.base_lr > 0
         assert isinstance(momentum, float) and momentum > 0
@@ -27,9 +27,9 @@ class OptimizerBuilder:
 
         params = [{'params': params_with_decay, 'weight_decay': weight_decay}, {'params': params_no_decay, 'weight_decay': 0}]
 
-        if self.config['name'] == 'adam':
+        if self.config.name == 'adam':
             return torch.optim.Adam(params, lr=self.base_lr, weight_decay=0)
-        if self.config['name'] == 'sgd':
+        if self.config.name == 'sgd':
             return torch.optim.SGD(params, lr=self.base_lr, momentum=momentum, weight_decay=0)
         else:
             raise NotImplementedError(f"Non-supported optimizer: {self.config['name']}")

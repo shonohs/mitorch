@@ -49,28 +49,28 @@ class LinearWarmupLR(WarmupLR):
 
 class LrSchedulerBuilder:
     def __init__(self, config):
-        self.config = config['lr_scheduler']
-        self.max_epochs = config['max_epochs']
+        self.config = config.lr_scheduler
+        self.max_epochs = config.max_epochs
 
     def build(self, optimizer, num_epoch_iters):
         total_iters = num_epoch_iters * self.max_epochs
         logging.info(f"Building a lr_scheduler. total_iters: {total_iters}, config: {self.config}")
 
-        if self.config['name'] == 'cosine_annealing':
+        if self.config.name == 'cosine_annealing':
             lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, total_iters)
-        elif self.config['name'] == 'linear_decreasing':
+        elif self.config.name == 'linear_decreasing':
             lr_scheduler = LinearDecreasingLR(optimizer, total_iters)
-        elif self.config['name'] == 'step':
-            step_size = self.config['step_size'] * num_epoch_iters
-            lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size, self.config['step_gamma'])
+        elif self.config.name == 'step':
+            step_size = self.config.step_size * num_epoch_iters
+            lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size, self.config.step_gamma)
         else:
             raise NotImplementedError(f"Unsupported LR scheduler: {self.config['name']}")
 
-        warmup_scheduler = self.config.get('warmup')
+        warmup_scheduler = self.config.warmup
         if warmup_scheduler:
-            warmup_epochs = self.config.get('warmup_epochs')
+            warmup_epochs = self.config.warmup_epochs
             warmup_iters = warmup_epochs * num_epoch_iters
-            warmup_factor = self.config.get('warmup_factor', 0.01)
+            warmup_factor = self.config.warmup_factor
             if warmup_scheduler == 'const':
                 lr_scheduler = WarmupLR(lr_scheduler, warmup_iters, warmup_factor)
             elif warmup_scheduler == 'linear':
