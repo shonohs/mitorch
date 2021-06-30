@@ -19,6 +19,12 @@ class JobRecord:
     created_at: datetime.datetime = None
     updated_at: datetime.datetime = None
 
+    def __str__(self):
+        s = f"[{self.status}] P{self.priority} {self.job_id}: {self.config}. Created at {self.created_at.isoformat(timespec='minutes')}."
+        if self.base_job_id:
+            s += f' <= {self.base_job_id}'
+        return s
+
 
 class JobRepository:
     def __init__(self, mongodb_url):
@@ -69,6 +75,11 @@ class JobRepository:
         assert isinstance(job_id, uuid.UUID)
         raw_data = self._job_collection.find_one({'_id': job_id})
         return self._job_document_to_record(raw_data)
+
+    def delete_job(self, job_id):
+        assert isinstance(job_id, uuid.UUID)
+        result = self._job_collection.delete_one({'_id': job_id})
+        return result.deleted_count == 1
 
     @staticmethod
     def _job_document_to_record(raw_data):

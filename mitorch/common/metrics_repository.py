@@ -23,6 +23,11 @@ class MetricsRepository:
         results = self._metrics_collection.find({'job_id': job_id})
         return [self._to_metrics(r) for r in results]
 
+    def delete_metrics(self, job_id):
+        assert isinstance(job_id, uuid.UUID)
+        result = self._metrics_collection.delete_many({'job_id': job_id})
+        return result.deleted_count
+
     @staticmethod
     def _to_metrics(raw_data):
         return Metrics(job_id=raw_data['job_id'], epoch=raw_data['e'], metrics=raw_data['m'])
