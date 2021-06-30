@@ -29,7 +29,11 @@ class OptimizerBuilder:
 
         if self.config.name == 'adam':
             return torch.optim.Adam(params, lr=self.base_lr, weight_decay=0)
-        if self.config.name == 'sgd':
+        elif self.config.name == 'sgd':
             return torch.optim.SGD(params, lr=self.base_lr, momentum=momentum, weight_decay=0)
+        elif self.config.name == 'rmsprop':
+            # The hard coded parameters are from torchvision.
+            # TODO: Do they make sense?
+            return torch.optim.RMSprop(params, lr=self.base_lr, momentum=momentum, weight_decay=0, eps=0.0316, alpha=0.9)
         else:
             raise NotImplementedError(f"Non-supported optimizer: {self.config['name']}")

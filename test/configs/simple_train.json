@@ -1,22 +1,27 @@
 {
     "model": {
-        "name": "MobileNetV2"
+        "input_size": 224,
+        "name": "MobileNetV3"
     },
     "optimizer": {
-        "name": "sgd",
-	"momentum": 0.9,
-	"weight_decay": 1e-5
+        "name": "rmsprop",
+        "momentum": 0.9,
+        "weight_decay": 1e-05
     },
     "lr_scheduler": {
         "name": "cosine_annealing",
-	"base_lr": 0.1
+        "base_lr": 0.05
     },
     "augmentation": {
-        "train": "inception",
-        "val": "resize"
+        "train": "random_resize",
+        "val": "center_crop"
     },
-    "batch_size": 256,
-    "input_size": 224,
+    "dataset": {
+        "train": "classification/imagenet_20200401/train_images.txt",
+        "val": "classification/imagenet_20200401/val_images.txt"
+    },
+    "batch_size": 128,
     "max_epochs": 100,
-    "dataset": "ImageNet"
+    "task_type": "multiclass_classification",
+    "num_processes": 8
 }
