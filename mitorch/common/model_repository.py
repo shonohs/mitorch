@@ -1,5 +1,3 @@
-import dataclasses
-import json
 import logging
 import shutil
 import urllib.parse
@@ -27,12 +25,6 @@ class ModelRepository:
             with open(filepath, 'wb') as f:
                 shutil.copyfileobj(r.raw, f, length=4 * 1024 * 1024)
 
-    def upload_config(self, job_id, training_config):
-        config = dataclasses.asdict(training_config)
-        config_binary = json.dumps(config, indent=4).encode('utf-8')
-        url = self._get_config_url(job_id)
-        self._put_blob(url, config_binary)
-
     def upload_file(self, job_id, filepath):
         url = self._get_file_url(job_id, filepath.name)
         self._put_blob(url, filepath.read_bytes())
@@ -46,9 +38,6 @@ class ModelRepository:
 
     def _get_model_url(self, job_id):
         return self._get_file_url(job_id, 'model.pth')
-
-    def _get_config_url(self, job_id):
-        return self._get_file_url(job_id, 'config.json')
 
     def _get_file_url(self, job_id, relative_path):
         parsed = urllib.parse.urlparse(self._base_url)

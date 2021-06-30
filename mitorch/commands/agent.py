@@ -1,11 +1,13 @@
 """Get training configs from database and run mitrain with it."""
 import argparse
+import dataclasses
+import json
 import logging
 import pathlib
+import subprocess
 import tempfile
 import torch
 from mitorch.common import Environment, JobRepository, ModelRepository
-from mitorch.commands.train import train
 from mitorch.commands.common import init_logging
 
 logger = logging.getLogger(__name__)
@@ -18,7 +20,11 @@ def process_one_job(job, db_url, model_repository, data_dir):
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir = pathlib.Path(temp_dir)
+        config_filepath = temp_dir / 'config.json'
         output_filepath = temp_dir / 'trained_weights.pth'
+
+        config = dataclasses.asdict(job.config)
+        config_filepath.write_text(json.dumps(config, indent=4))
 
         if job.base_job_id:
             pretrained_weights_filepath = temp_dir / 'pretrained_weights.pth'
@@ -28,16 +34,27 @@ def process_one_job(job, db_url, model_repository, data_dir):
 
         log_filepath = temp_dir / 'training.log'
         tb_log_dir = temp_dir / 'tensorboard/'
-        log_handler = logging.FileHandler(log_filepath)
-        logging.getLogger().addHandler(log_handler)
-        train(job.config, train_dataset_filepath, val_dataset_filepath, pretrained_weights_filepath, output_filepath, job.job_id, db_url, tb_log_dir)
-        logging.getLogger().removeHandler(log_handler)
+
+        command = ['mitrain', str(config_filepath), str(train_dataset_filepath), str(val_dataset_filepath),
+                   '--output_filepath', str(output_filepath),
+                   '--job_id', str(job.job_id),
+                   '--db_url', db_url,
+                   '--tensorboard_log', str(tb_log_dir),
+                   '--log_file', str(log_filepath)]
+
+        if pretrained_weights_filepath:
+            command.extend(['--weights_filepath', str(pretrained_weights_filepath)])
+
+        logger.info(f"Starting the training. command: {command}")
+        proc = subprocess.run(command)
+        if proc.returncode != 0:
+            logger.warning(f"Training return code is {proc.returncode}")
 
         model_repository.upload_weights(job.job_id, output_filepath)
 
         # Optional file uploads.
         try:
-            model_repository.upload_config(job.job_id, job.config)
+            model_repository.upload_file(job.job_id, config_filepath)
         except Exception:
             logger.exception("Failed to upload a job config.")
 

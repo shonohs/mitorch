@@ -72,8 +72,13 @@ def main():
     parser.add_argument('--job_id', type=uuid.UUID)
     parser.add_argument('--db_url')
     parser.add_argument('--tensorboard_log', type=pathlib.Path)
+    parser.add_argument('--log_file', type=pathlib.Path)
 
     args = parser.parse_args()
+    if args.log_file:
+        log_handler = logging.FileHandler(args.log_file)
+        logging.getLogger().addHandler(log_handler)
+
     config = jsons.loads(args.config_filepath.read_text(), TrainingConfig)
 
     train(config, args.train_dataset_filepath, args.val_dataset_filepath, args.weights_filepath,
