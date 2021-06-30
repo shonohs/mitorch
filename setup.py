@@ -20,6 +20,7 @@ setuptools.setup(name='mitorch',
                  entry_points={
                      'console_scripts': [
                          'miagent=mitorch.commands.agent:main',
+                         'mipredict=mitorch.commands.predict:main',
                          'misubmit=mitorch.commands.submit:main',
                          'mitrain=mitorch.commands.train:main',
                          'miquery=mitorch.commands.query:main',
