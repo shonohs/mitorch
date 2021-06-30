@@ -1,6 +1,6 @@
 from mitorch.datasets.albumentations_transforms import (CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform,
                                                         RandomSizedBBoxSafeCropTransform, SurveillanceCameraTransform)
-from mitorch.datasets.transforms import InceptionTransform
+from mitorch.datasets.transforms import AutoAugmentTransform, InceptionTransform
 
 
 class TransformFactory:
@@ -8,7 +8,8 @@ class TransformFactory:
         self._is_object_detection = is_object_detection
 
     def create(self, name, input_size):
-        augmentation_class = {'center_crop': CenterCropTransform,
+        augmentation_class = {'auto_augment': AutoAugmentTransform,
+                              'center_crop': CenterCropTransform,
                               'inception': InceptionTransform,
                               'resize': ResizeTransform,
                               'resize_flip': ResizeFlipTransform,
