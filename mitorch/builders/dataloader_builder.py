@@ -44,8 +44,5 @@ class DataLoaderBuilder:
         return train_dataloader, val_dataloader
 
     @staticmethod
-    def build_augmentation(name, input_size, is_object_detection):
-        transform = TransformFactory(is_object_detection).create(name, input_size)
-        if not transform:
-            raise NotImplementedError(f"Non supported augmentation: {name}")
-        return transform
+    def build_augmentation(augmentation, input_size, is_object_detection):
+        return TransformFactory(is_object_detection, input_size).create(augmentation)

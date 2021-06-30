@@ -4,8 +4,8 @@ from typing import Optional, List
 
 @dataclasses.dataclass(frozen=True)
 class AugmentationConfig:
-    train: Optional[str]
-    val: Optional[str]
+    train: List[str]
+    val: List[str]
 
 
 @dataclasses.dataclass(frozen=True)

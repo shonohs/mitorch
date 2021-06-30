@@ -2,7 +2,7 @@ import setuptools
 
 
 setuptools.setup(name='mitorch',
-                 version='0.0.2',
+                 version='0.0.3',
                  author='shono',
                  description="MiTorch training framework",
                  url='https://github.com/shonohs/mitorch',
