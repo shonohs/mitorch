@@ -60,8 +60,6 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
 
 
 def main():
-    init_logging()
-
     parser = argparse.ArgumentParser(description="Train a model")
     parser.add_argument('config_filepath', type=pathlib.Path)
     parser.add_argument('train_dataset_filepath', type=pathlib.Path)
@@ -75,9 +73,7 @@ def main():
     parser.add_argument('--log_file', type=pathlib.Path)
 
     args = parser.parse_args()
-    if args.log_file:
-        log_handler = logging.FileHandler(args.log_file)
-        logging.getLogger().addHandler(log_handler)
+    init_logging(args.log_file)
 
     config = jsons.loads(args.config_filepath.read_text(), TrainingConfig)
 
