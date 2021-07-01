@@ -23,6 +23,10 @@ class MetricsRepository:
         results = self._metrics_collection.find({'job_id': job_id})
         return [self._to_metrics(r) for r in results]
 
+    def get_final_metrics(self, job_id):
+        r = self._metrics_collection.find_one({'job_id': job_id}, sort=[('_id', pymongo.DESCENDING)])
+        return self._to_metrics(r) if r else None
+
     def delete_metrics(self, job_id):
         assert isinstance(job_id, uuid.UUID)
         result = self._metrics_collection.delete_many({'job_id': job_id})

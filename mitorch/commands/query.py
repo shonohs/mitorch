@@ -22,12 +22,18 @@ def query_job(db_url, job_id):
 
 def query_job_list(db_url):
     job_repository = JobRepository(db_url)
+    metrics_repository = MetricsRepository(db_url)
     jobs = job_repository.query_jobs()
     if not jobs:
         print("No job found.")
 
     for job_record in jobs:
         print(job_record)
+
+        if job_record.status == 'completed':
+            final_metrics = metrics_repository.get_final_metrics(job_record.job_id)
+            if final_metrics:
+                print(f"        Metrics: {final_metrics.metrics}")
 
 
 def main():
