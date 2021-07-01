@@ -63,31 +63,6 @@ class SurveillanceCameraTransform(AlbumentationsTransform):
                 albumentations.ToGray(p=0.1)]
 
 
-class RandomResizedCropTransform(AlbumentationsTransform):
-    def get_transforms(self, input_size):
-        return [albumentations.RandomResizedCrop(input_size, input_size, interpolation=cv2.INTER_CUBIC),
-                albumentations.HorizontalFlip(),
-                albumentations.RandomBrightnessContrast()]
-
-
-class ResizeTransform(AlbumentationsTransform):
-    def get_transforms(self, input_size):
-        return [albumentations.Resize(input_size, input_size)]
-
-
-class ResizeFlipTransform(AlbumentationsTransform):
-    def get_transforms(self, input_size):
-        return [albumentations.Resize(input_size, input_size),
-                albumentations.Flip()]
-
-
-class RandomSizedBBoxSafeCropTransform(AlbumentationsTransform):
-    def get_transforms(self, input_size):
-        return [albumentations.RandomSizedBBoxSafeCrop(input_size, input_size, erosion_rate=0.2),
-                albumentations.Flip(),
-                albumentations.RandomBrightnessContrast()]
-
-
 class CenterCropTransform(AlbumentationsTransform):
     """This method was found in pytorch's imagenet training example."""
     def get_transforms(self, input_size):

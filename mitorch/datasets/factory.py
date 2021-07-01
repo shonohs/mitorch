@@ -1,7 +1,6 @@
 import albumentations
 import cv2
-from mitorch.datasets.albumentations_transforms import (CenterCropTransform, ResizeTransform, ResizeFlipTransform, RandomResizedCropTransform,
-                                                        RandomSizedBBoxSafeCropTransform, SurveillanceCameraTransform, AlbumentationsTransform)
+from mitorch.datasets.albumentations_transforms import SurveillanceCameraTransform, AlbumentationsTransform
 from mitorch.datasets.transforms import AutoAugmentTransform, InceptionTransform
 
 COMPONENT_BUILDERS = {
@@ -21,12 +20,7 @@ COMPONENT_BUILDERS = {
 # If the augmentation description is a simple string, return the following transforms.
 SPECIAL_TRANSFORM = {
     'auto_augment': AutoAugmentTransform,
-    'center_crop': CenterCropTransform,
     'inception': InceptionTransform,
-    'resize': ResizeTransform,
-    'resize_flip': ResizeFlipTransform,
-    'random_resize': RandomResizedCropTransform,
-    'random_resize_bbox': RandomSizedBBoxSafeCropTransform,
     'surveillance': SurveillanceCameraTransform
 }
 
