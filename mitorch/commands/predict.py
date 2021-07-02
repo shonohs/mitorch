@@ -14,6 +14,7 @@ def predict(config_filepath, weights_filepath, num_classes, image_filepaths):
 
     transform = TransformFactory(config.task_type == 'object_detection', config.model.input_size).create(config.augmentation.val)
     model = ModelBuilder(config).build(num_classes, weights_filepath)
+    model.eval()
 
     for filepath in image_filepaths:
         with PIL.Image.open(filepath) as image:

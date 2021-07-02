@@ -17,13 +17,10 @@ class ModelRepository:
         self._put_blob(url, filepath.read_bytes())
         logger.info("Upload completed.")
 
-    @tenacity.retry(retry=tenacity.retry_if_exception_type(IOError), stop=tenacity.stop_after_attempt(2), reraise=True)
     def download_weights(self, job_id, filepath):
         url = self._get_model_url(job_id)
         logger.info(f"Downloading from {url}.")
-        with requests.get(url, stream=True) as r:
-            with open(filepath, 'wb') as f:
-                shutil.copyfileobj(r.raw, f, length=4 * 1024 * 1024)
+        self._get_blob(url, filepath)
 
     def upload_file(self, job_id, filepath):
         url = self._get_file_url(job_id, filepath.name)
@@ -47,3 +44,9 @@ class ModelRepository:
     @tenacity.retry(retry=tenacity.retry_if_exception_type(IOError), stop=tenacity.stop_after_attempt(2), reraise=True)
     def _put_blob(self, url, data):
         return requests.put(url=url, data=data, headers={'Content-Type': 'application/octet-stream', 'x-ms-blob-type': 'BlockBlob'})
+
+    @tenacity.retry(retry=tenacity.retry_if_exception_type(IOError), stop=tenacity.stop_after_attempt(2), reraise=True)
+    def _get_blob(self, url, output_filepath):
+        with requests.get(url, stream=True) as r:
+            with open(output_filepath, 'wb') as f:
+                shutil.copyfileobj(r.raw, f, length=4 * 1024 * 1024)
