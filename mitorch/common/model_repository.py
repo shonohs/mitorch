@@ -1,3 +1,4 @@
+import xml.etree.ElementTree as ET
 import logging
 import shutil
 import urllib.parse
@@ -21,6 +22,16 @@ class ModelRepository:
         url = self._get_model_url(job_id)
         logger.info(f"Downloading from {url}.")
         self._get_blob(url, filepath)
+
+    def download_all_files(self, job_id, output_dir):
+        blob_names = self._list_blob(str(job_id))
+        for blob_name in blob_names:
+            blob_name = blob_name.replace(str(job_id) + '/', '')
+            output_filepath = output_dir / blob_name
+            output_filepath.parent.mkdir(parents=True, exist_ok=True)
+            url = self._get_file_url(job_id, blob_name)
+            self._get_blob(url, output_filepath)
+        return len(blob_names)
 
     def upload_file(self, job_id, filepath):
         url = self._get_file_url(job_id, filepath.name)
@@ -50,3 +61,13 @@ class ModelRepository:
         with requests.get(url, stream=True) as r:
             with open(output_filepath, 'wb') as f:
                 shutil.copyfileobj(r.raw, f, length=4 * 1024 * 1024)
+
+    def _list_blob(self, prefix):
+        url = self._base_url + '&restype=container&comp=list'
+        if prefix:
+            url += '&prefix=' + prefix
+
+        response = requests.get(url)
+        root = ET.fromstring(response.text)
+        blob_names = [blob.find('Name').text for blob in root.find('Blobs').findall('Blob')]
+        return blob_names
