@@ -80,4 +80,8 @@ class MongoDBLogger(LoggerBase):
         m = {key: value.tolist() if torch.is_tensor(value) else value for key, value in metrics.items() if not key.endswith('_step') and key != 'epoch'}
         if m and 'epoch' in metrics:
             epoch = metrics['epoch']
-            self._client.mitorch.training_metrics.insert_one({'job_id': self._job_id, 'e': epoch, 'm': m})
+            try:
+                self._client.mitorch.training_metrics.insert_one({'job_id': self._job_id, 'e': epoch, 'm': m})
+            except pymongo.errors.PyMongoError:
+                logger.exception("Failed to log metrics. Got pymongo exception.")
+                # Ignore the exception.
