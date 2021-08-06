@@ -1,5 +1,6 @@
 """A command to query jobs."""
 import argparse
+import collections
 import pathlib
 import uuid
 from mitorch.common import Environment, JobRepository, MetricsRepository, ModelRepository
@@ -24,16 +25,19 @@ def query_job_list(job_repository, metrics_repository, show_short_description):
     if not jobs:
         print("No job found.")
 
+    status_counter = collections.Counter()
     for job_record in jobs:
         if show_short_description:
             print(f"[{job_record.status}] {job_record.job_id} ({job_record.config.model.name}) {job_record.config.dataset.train}")
         else:
             print(job_record)
+        status_counter[job_record.status] += 1
 
         if job_record.status == 'completed':
             final_metrics = metrics_repository.get_final_metrics(job_record.job_id)
             if final_metrics:
                 print(f"        Metrics: {final_metrics.metrics}")
+    print(status_counter)
 
 
 def download_job_files(job_repository, model_repository, job_id, output_dir):
