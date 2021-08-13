@@ -20,12 +20,12 @@ def _draw_od_labels(image, annotations, label_names):
         draw.text((x, y), label_names[class_id])
 
 
-def visualize_augmentation(dataset_filepath, output_dir, name, input_size, num_images, num_tries):
+def visualize_augmentation(dataset_filepath, output_dir, transform_names, input_size, num_images, num_tries):
     dataset = ImageDataset.from_file(dataset_filepath, lambda x: x)
     is_object_detection = isinstance(dataset, ObjectDetectionDataset)
-    transform = TransformFactory(is_object_detection).create(name, input_size)
+    transform = TransformFactory(is_object_detection, input_size).create(transform_names)
     if not transform:
-        raise RuntimeError(f"Unknown transform: {name}")
+        raise RuntimeError(f"Unknown transform: {transform_names}")
     dataset.transform = transform
 
     for i in range(num_images):
@@ -42,9 +42,9 @@ def visualize_augmentation(dataset_filepath, output_dir, name, input_size, num_i
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('transform_name')
     parser.add_argument('dataset_filepath', type=pathlib.Path)
     parser.add_argument('output_dir', type=pathlib.Path)
+    parser.add_argument('transform_name', nargs='+')
     parser.add_argument('--input_size', type=int, default=224)
     parser.add_argument('--num_images', '-n', type=int, default=10)
     parser.add_argument('--num_tries', '-t', type=int, default=10)
