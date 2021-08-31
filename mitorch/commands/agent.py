@@ -6,6 +6,7 @@ import logging
 import pathlib
 import subprocess
 import tempfile
+import time
 import torch
 from mitorch.common import Environment, JobRepository, ModelRepository
 from mitorch.commands.common import init_logging
@@ -80,8 +81,9 @@ def run_agent(db_url, storage_url, data_dir, num_runs):
     for _ in range(num_runs):
         job = job_repository.get_next_job(num_processes=num_processes)
         if not job:
-            logger.info("The job queue is empty. Exiting...")
-            break
+            logger.info("The job queue is empty. Will retry in 10 minutes.")
+            time.sleep(600)
+            continue
 
         logger.info(f"Got a new job! {job.job_id}")
 
