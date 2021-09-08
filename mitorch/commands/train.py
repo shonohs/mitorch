@@ -41,12 +41,16 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
         if config.use_fp16:
             _logger.warning("AMP is requested, but GPU is not available.")
 
+    callbacks = []
+    if config.use_swa:
+        callbacks.append(pl.callbacks.StochasticWeightAveraging(swa_epoch_start=config.swa_epoch_start))
+
     train_dataloader, val_dataloader = DataLoaderBuilder(config).build(train_dataset_filepath, val_dataset_filepath)
     num_classes = len(train_dataloader.dataset.labels) if train_dataloader else len(val_dataloader.dataset.labels)
 
     trainer = pl.Trainer(max_epochs=config.max_epochs, fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend='ddp', terminate_on_nan=True,
                          logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=False,
-                         accumulate_grad_batches=config.accumulate_grad_batches, checkpoint_callback=False, precision=precision)
+                         accumulate_grad_batches=config.accumulate_grad_batches, checkpoint_callback=False, precision=precision, callbacks=callbacks)
 
     model = MiModel(config, num_classes, weights_filepath)
     trainer.fit(model, train_dataloader, val_dataloader)

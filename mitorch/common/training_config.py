@@ -46,6 +46,8 @@ class TrainingConfig:
     batch_size: int
     max_epochs: int
     use_fp16: bool = True
+    use_swa: bool = False
+    swa_epoch_start: float = 0.9
     model: ModelConfig = None
     augmentation: AugmentationConfig = None
     lr_scheduler: LrSchedulerConfig = None
