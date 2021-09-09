@@ -81,8 +81,12 @@ def main():
 
     config = jsons.loads(args.config_filepath.read_text(), TrainingConfig)
 
-    train(config, args.train_dataset_filepath, args.val_dataset_filepath, args.weights_filepath,
-          args.output_filepath, args.job_id, args.db_url, args.tensorboard_log, args.fast_dev_run)
+    try:
+        train(config, args.train_dataset_filepath, args.val_dataset_filepath, args.weights_filepath,
+              args.output_filepath, args.job_id, args.db_url, args.tensorboard_log, args.fast_dev_run)
+    except Exception:
+        _logger.exception("Training failed.")
+        raise
 
 
 if __name__ == '__main__':
