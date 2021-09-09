@@ -58,9 +58,9 @@ def main():
 
     env = Environment()
     parser = argparse.ArgumentParser()
+    parser.add_argument('job_id', nargs='?', type=uuid.UUID)
     parser.add_argument('--db_url', default=env.db_url)
     parser.add_argument('--storage_url', default=env.storage_url)
-    parser.add_argument('--job_id', type=uuid.UUID)
     parser.add_argument('--short', action='store_true')
     parser.add_argument('--download', '-d', action='store_true')
 
