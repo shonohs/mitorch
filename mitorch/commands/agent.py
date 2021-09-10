@@ -51,8 +51,6 @@ def process_one_job(job, db_url, model_repository, data_dir):
         if proc.returncode != 0:
             logger.warning(f"Training return code is {proc.returncode}")
 
-        model_repository.upload_weights(job.job_id, output_filepath)
-
         # Optional file uploads.
         try:
             model_repository.upload_file(job.job_id, config_filepath)
@@ -68,6 +66,8 @@ def process_one_job(job, db_url, model_repository, data_dir):
             model_repository.upload_dir(job.job_id, tb_log_dir)
         except Exception:
             logger.exception("Failed to upload a tensorboard log.")
+
+        model_repository.upload_weights(job.job_id, output_filepath)
 
 
 def run_agent(db_url, storage_url, data_dir, num_runs):
