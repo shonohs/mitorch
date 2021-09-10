@@ -1,10 +1,15 @@
 from abc import ABC, abstractmethod
 import collections
+import logging
+import math
 import statistics
 
 import numpy as np
 import sklearn.metrics
 import torch
+
+
+logger = logging.getLogger(__name__)
 
 
 class Evaluator(ABC):
@@ -110,6 +115,11 @@ class ObjectDetectionSingleIOUEvaluator(Evaluator):
 
         assert len(predictions) == len(targets)
 
+        for p in predictions:
+            for bbox in p:
+                if not all(math.isfinite(x) for x in bbox):
+                    logger.warning(f"Predicted results have invalid numbers.: {bbox}")
+
         eval_predictions = collections.defaultdict(list)
         eval_ground_truths = collections.defaultdict(dict)
         for img_idx, prediction in enumerate(predictions):
@@ -127,7 +137,7 @@ class ObjectDetectionSingleIOUEvaluator(Evaluator):
         class_indices = set(list(eval_predictions.keys()) + list(eval_ground_truths.keys()))
         for class_index in class_indices:
             is_correct, probabilities = self._evaluate_predictions(eval_ground_truths[class_index], eval_predictions[class_index], self.iou)
-            true_num = sum([len(l) for l in eval_ground_truths[class_index].values()])
+            true_num = sum([len(x) for x in eval_ground_truths[class_index].values()])
 
             self.is_correct[class_index].extend(is_correct)
             self.probabilities[class_index].extend(probabilities)
