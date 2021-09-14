@@ -53,6 +53,16 @@ class JobRepository:
             raise RuntimeError(f"Job not found: {job_id}")
 
     @tenacity.retry(retry=tenacity.retry_if_exception_type(pymongo.errors.PyMongoError), stop=tenacity.stop_after_attempt(2), reraise=True)
+    def update_job_priority(self, job_id: uuid.UUID, new_priority):
+        assert isinstance(job_id, uuid.UUID)
+        assert isinstance(new_priority, int)
+
+        result = self._job_collection.update_one({'_id': job_id}, {'$set': {'priority': new_priority}})
+
+        if result.modified_count == 0:
+            raise RuntimeError(f"Job not found: {job_id}")
+
+    @tenacity.retry(retry=tenacity.retry_if_exception_type(pymongo.errors.PyMongoError), stop=tenacity.stop_after_attempt(2), reraise=True)
     def add_new_job(self, training_config: TrainingConfig, priority=2, base_job_id=None):
         assert base_job_id is None or isinstance(base_job_id, uuid.UUID)
         job_id = uuid.uuid4()
