@@ -2,7 +2,7 @@ import setuptools
 
 
 setuptools.setup(name='mitorch',
-                 version='0.1.0',
+                 version='0.1.1',
                  author='shono',
                  description="MiTorch training framework",
                  url='https://github.com/shonohs/mitorch',
@@ -29,7 +29,6 @@ setuptools.setup(name='mitorch',
                  classifiers=[
                      'Development Status :: 4 - Beta',
                      'License :: OSI Approved :: MIT License',
-                     'Programming Language :: Python :: 3 :: Only',
                      'Topic :: Scientific/Engineering :: Artificial Intelligence'
                  ],
                  python_requires='>=3.8',
