@@ -50,7 +50,7 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
 
     trainer = pl.Trainer(max_epochs=config.max_epochs, fast_dev_run=fast_dev_run, gpus=gpus, distributed_backend='ddp', terminate_on_nan=True,
                          logger=logger, progress_bar_refresh_rate=0, check_val_every_n_epoch=10, num_sanity_val_steps=0, deterministic=False,
-                         accumulate_grad_batches=config.accumulate_grad_batches, checkpoint_callback=False, precision=precision, callbacks=callbacks)
+                         accumulate_grad_batches=config.accumulate_grad_batches, checkpoint_callback=False, precision=precision, callbacks=callbacks, sync_batchnorm=True)
 
     model = MiModel(config, num_classes, weights_filepath)
     trainer.fit(model, train_dataloader, val_dataloader)
