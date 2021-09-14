@@ -13,10 +13,10 @@ setuptools.setup(name='mitorch',
                                    'pymongo',
                                    'pytorch_lightning~=1.4.5',
                                    'requests',
+                                   'scikit-learn',
                                    'tenacity',
                                    'torch~=1.9.0',
-                                   'torchvision>=0.5.0',
-                                   'sklearn'],
+                                   'torchvision>=0.5.0'],
                  entry_points={
                      'console_scripts': [
                          'miagent=mitorch.commands.agent:main',
