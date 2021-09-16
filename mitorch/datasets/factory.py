@@ -11,7 +11,7 @@ COMPONENT_BUILDERS = {
     'random_brightness_contrast': lambda input_size: albumentations.RandomBrightnessContrast(),
     'random_sized_bbox_safe_crop': lambda input_size: albumentations.RandomSizedBBoxSafeCrop(input_size, input_size, interpolation=cv2.INTER_CUBIC),
     'random_resized_crop': lambda input_size: albumentations.RandomResizedCrop(input_size, input_size, interpolation=cv2.INTER_CUBIC),
-    'resize': lambda input_size: albumentations.Resize(input_size, input_size),
+    'resize': lambda input_size: albumentations.Resize(input_size, input_size, interpolation=cv2.INTER_CUBIC),
     'smallest_max_size': lambda input_size: albumentations.SmallestMaxSize(int(input_size / 224 * 256), interpolation=cv2.INTER_CUBIC),
     'to_gray': lambda input_size: albumentations.ToGray(p=0.1),
 }
