@@ -56,11 +56,12 @@ def train(config, train_dataset_filepath, val_dataset_filepath, weights_filepath
     trainer.fit(model, train_dataloader, val_dataloader)
     _logger.info("Training completed.")
 
-    trainer.validate(model, val_dataloader)
-    _logger.info("Validation completed.")
-
+    # Save the weights before validation since there is a risk of failure.
     if output_filepath:
         model.save(output_filepath)
+
+    trainer.validate(model, val_dataloader)
+    _logger.info("Validation completed.")
 
 
 def main():
